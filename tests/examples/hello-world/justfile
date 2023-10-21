@@ -1,0 +1,32 @@
+_default:
+    @just --list
+
+# cleans the package build directory
+clean:
+	@rm -r node_modules
+
+# install node modules
+install:
+    @yarn install
+
+# run yarn install if needed
+ensure_installed:
+    #!/usr/bin/env bash
+    if [[ ! -d "node_modules" ]]; then
+        yarn install
+    fi
+
+# run checks
+check: ensure_installed
+    @yarn run checks:ts
+
+# run checks
+fmt: ensure_installed
+    @yarn run checks:formatting
+
+run *args='': ensure_installed
+    @yarn run run-tests  {{ args }}
+
+# runs the same checks performed by the CI job
+ci: ensure_installed
+    @yarn run ci

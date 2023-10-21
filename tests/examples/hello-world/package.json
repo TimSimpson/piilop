@@ -1,0 +1,34 @@
+{
+    "name": "proboscis-2-hello-world",
+    "version": "1.0.0",
+    "description": "comprehensive example of using Proboscis 2",
+    "main": "src/main.ts",
+    "private": true,
+    "scripts": {
+        "run-tests": "ts-node --transpile-only ./src/main.ts",
+        "checks": "run-s checks:*",
+        "checks:formatting": "prettier --write \"src/**/**/!(*.d).{ts,tsx,css,json,html}\"",
+        "checks:lint": "eslint \"src/**/*.{ts,tsx}\"",
+        "checks:ts": "tsc --noEmit",
+        "ci": "run-s ci:formatting checks:lint checks:ts",
+        "ci:formatting": "prettier --check \"src/**/**/!(*.d).{ts,tsx,css,json,html}\""
+    },
+    "prettier": {
+        "tabWidth": 4
+    },
+    "dependencies": {
+        "@commander-js/extra-typings": "^9.4.1",
+        "@types/chai": "4.3.4",
+        "chai": "4.3.7",
+        "commander": "^9.4.1",
+        "ts-node": "10.1.0",
+        "tsconfig-paths": "^4.1.2",
+        "typescript": "4.1.3",
+        "unique-names-generator": "4.7.1"
+    },
+    "devDependencies": {
+        "@types/node": "^14.14.33",
+        "@types/yargs": "^11.0.0",
+        "npm-run-all": "^4.1.5"
+    }
+}

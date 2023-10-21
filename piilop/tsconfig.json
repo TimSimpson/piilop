@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "allowUnreachableCode": false,
+        "declaration": true,
+        "experimentalDecorators": true,
+        "lib": ["dom", "es2019"],
+        "moduleResolution": "node",
+        "module": "CommonJS",
+        "target": "ES2019",
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "jsx": "react",
+        "jsxFactory": "h",
+        "strict": true,
+        "importsNotUsedAsValues": "error",
+        "outDir": "./dist",
+        "allowJs": true,
+        "baseUrl": "src",
+        "rootDir": "src",
+        "paths": {
+            "src/*": ["./src/*"]
+        }
+    },
+    "include": ["./**/*.ts"],
+    "exclude": ["node_modules"],
+    "ts-node": {
+        "require": ["tsconfig-paths/register"]
+    }
+}
