@@ -6,4 +6,4 @@
 export { TestContextPushArgs, TestContextFunc } from "./base";
 export { Priority, TestEntry, TestRegistry } from "./registry";
 export { Data, ResourceManager } from "./resources";
-export { createRunnerList } from "./sorting";
+export { createRunnerList, TestRunnerItem } from "./sorting";

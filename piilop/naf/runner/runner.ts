@@ -279,22 +279,57 @@ export class TestMain {
         console.log(`${prefix} ${name} :: ${status}`);
     }
 
-    public async runTest(name?: string) {
+    public async runTest(name?: string, workerCount?: number) {
         name = name || "";
 
         if (name == "all") {
             name = "";
         }
 
-        const list = core.createRunnerList(
+        const list: core.TestRunnerItem<TestContext>[] = core.createRunnerList(
             this.registry.getEntries(),
             createTestRunnerItem
         );
+
+        let workLeft: core.TestRunnerItem<TestContext>[] = [];
         for (const entry of list) {
             if (entry.entry.name.startsWith(name)) {
-                await entry.entry.func(this.ctx);
+                workLeft.push(entry);
+                // await entry.entry.func(this.ctx);
             }
         }
+
+        workLeft.reverse();
+
+        const workers =  [];
+        workerCount = workerCount || 1;
+        if (workerCount != undefined && workerCount > 0) {
+
+            console.log("MARIO 0")
+
+            const workerLogic = async () => {
+                await (async () => {})();
+                console.log("MARIO a")
+                while (workLeft.length > 0) {
+                    console.log("MARIO h")
+                    const nextEntry = workLeft.pop();
+                    await nextEntry?.entry.func(this.ctx);
+                    console.log("MARIO it got awaited?");
+                }
+                console.log("MARIO all done")
+            };
+
+            workers.push(workerLogic());
+        }
+
+        console.log("MARIO Ok now I done");
+        await Promise.all(workers);
+
+        // for (const entry of list) {
+        //     if (entry.entry.name.startsWith(name)) {
+        //         await entry.entry.func(this.ctx);
+        //     }
+        // }
         console.log("Done");
     }
 

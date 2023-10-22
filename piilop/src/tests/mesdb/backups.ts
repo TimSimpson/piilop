@@ -1,4 +1,4 @@
-import { dependsOn, randomName, resource, test } from "../../../naf";
+import { dependsOn, randomName, resource, test } from "naf";
 import { providers, clusters } from "./clusters";
 
 type BackupData = {

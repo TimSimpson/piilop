@@ -250,7 +250,7 @@ export class ResourceManager<
         return data;
     }
 
-    // Finds a resource's state, locks it, calls the given function, and unlcoks
+    // Finds a resource's state, locks it, calls the given function, and unlocks
     // it.
     public async findStateAndCall<R>(
         {

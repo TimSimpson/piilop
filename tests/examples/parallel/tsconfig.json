@@ -13,12 +13,11 @@
         "jsx": "react",
         "jsxFactory": "h",
         "strict": true,
-        "importsNotUsedAsValues": "error",
         "outDir": "./dist",
         "allowJs": true,
-        "baseUrl": "./",
+        "baseUrl": "src",
         "paths": {
-            "*": ["./*"]
+            "src/*": ["./src/*"]
         }
     },
     "include": ["./**/*.ts"],

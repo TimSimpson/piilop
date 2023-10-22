@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Command } from "@commander-js/extra-typings";
-import { clear, info, load, runTests, save, status } from "tests";
+import { clear, info, load, runTests, save, status } from "src/tests";
 import { selfTests } from "../../naf/selfTests";
 
 const program = new Command("naft");

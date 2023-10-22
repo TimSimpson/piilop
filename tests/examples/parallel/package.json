@@ -1,10 +1,11 @@
 {
-    "name": "piilop",
-    "version": "0.0.1",
-    "description": "Proboscis II: Legend of Proboscis",
+    "name": "proboscis-2-parallel",
+    "version": "1.0.0",
+    "description": "runs stuff in parallel",
+    "main": "src/main.ts",
+    "private": true,
     "scripts": {
-        "build": "tsc",
-        "run-tests": "ts-node --transpile-only ./src/cli/main.ts",
+        "run-tests": "ts-node --transpile-only ./src/main.ts",
         "checks": "run-s checks:*",
         "checks:formatting": "prettier --write \"src/**/**/!(*.d).{ts,tsx,css,json,html}\"",
         "checks:lint": "eslint \"src/**/*.{ts,tsx}\"",
@@ -18,18 +19,15 @@
     "dependencies": {
         "@commander-js/extra-typings": "^9.4.1",
         "@types/chai": "4.3.4",
-        "@typescript-eslint/eslint-plugin": "^6.8.0",
-        "@typescript-eslint/parser": "^6.8.0",
         "chai": "4.3.7",
         "commander": "^9.4.1",
-        "eslint": "^8.52.0",
         "ts-node": "10.1.0",
         "tsconfig-paths": "^4.1.2",
         "typescript": "5.2.2",
         "unique-names-generator": "4.7.1"
     },
     "devDependencies": {
-        "@types/node": "^14.14.33",
+        "@types/node": "^20.8.7",
         "@types/yargs": "^11.0.0",
         "npm-run-all": "^4.1.5"
     }

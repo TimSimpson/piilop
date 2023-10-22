@@ -24,4 +24,7 @@ pushd tests/examples/hello-world
 # npm link piilop
 yarn install
 just check
+just run test
+just run test --testName Apps
+just run test --testName Containers
 popd
