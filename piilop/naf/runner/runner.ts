@@ -304,9 +304,9 @@ export class TestMain {
 
             workLeft.reverse();
 
-            const workers =  [];
+            const workers : Promise<void>[] =  [];
             workerCount = workerCount || 1;
-            if (workerCount != undefined && workerCount > 0) {
+            for (let i = 0; i < workerCount; i ++) {
                 const workerLogic = async () => {
                     await (async () => {})();
                     while (workLeft.length > 0) {
@@ -317,6 +317,7 @@ export class TestMain {
 
                 workers.push(workerLogic());
             }
+
 
             await Promise.all(workers);
         } else {

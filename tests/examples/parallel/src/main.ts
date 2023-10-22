@@ -185,7 +185,7 @@ program
     .action(async (_options) => {
         const main = new p2.TestMain(p2.registry);
         await Promise.all([
-            main.runTest("", 10),
+            main.runTest("", 100),
         ]
         );
         console.log("Test finished. Here are the containers created:");
