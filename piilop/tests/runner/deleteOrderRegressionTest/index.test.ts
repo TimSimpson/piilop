@@ -32,18 +32,6 @@ describe("order / resource fetching should work with delete", () => {
         }
         {
             const actual = await runTests(registry);
-            // TODO: this seems very clearly wrong: the "delete" is happening
-            //       before a test that gets the containers.
-            //       Looking at it, `registerDeleteTests` creates tests that
-            //       use delete but doesn't set this priority to anything special,
-            //      so it seems correct that they could run before the other
-            //      tests have finished. A simple fix could be to change the priority
-            //      to last, which I will try after recreating the other bug
-            //      that caused me to look into this.
-            //      UPDATE: the DSL seems to pass "Priority.First" to both the
-            //      create and delete test helpers. That seems wrong?
-            //      But also the helper shouldn't even need to do this as the
-            //      lower level API should pass an option by default.
             chai.assert.deepEqual(
                 actual,
                 [
@@ -79,12 +67,38 @@ describe("order / resource fetching should work with delete", () => {
                     "FINISH create container ubuntu :: passed",
                     "START create container windows",
                     "FINISH create container windows :: passed",
+                    "START test we can get Ubuntu containers",
+                    "FINISH test we can get Ubuntu containers :: passed",
+                    "START create app on os ubuntu, pkg name nodejs",
+                    "FINISH create app on os ubuntu, pkg name nodejs :: passed",
+                    "START create app on os windows, pkg name skifree",
+                    "FINISH create app on os windows, pkg name skifree :: passed",
+                    "START create app on os macos, pkg name GarageBand",
+                    "START create container macos",
+                    "FINISH create container macos :: passed",
+                    "FINISH create app on os macos, pkg name GarageBand :: passed",
+                    "START test Python on Ubuntu",
+                    "START create app on os ubuntu, pkg name python",
+                    "FINISH create app on os ubuntu, pkg name python :: passed",
+                    "FINISH test Python on Ubuntu :: passed",
+                    "START test Go on Ubuntu",
+                    "START create app on os ubuntu, pkg name golang",
+                    "FINISH create app on os ubuntu, pkg name golang :: passed",
+                    "FINISH test Go on Ubuntu :: passed",
+                    "START test Mpx Play on FreeDOS",
+                    "START create app on os freedos, pkg name mpxplay",
+                    "START create container freedos",
+                    "FINISH create container freedos :: passed",
+                    "FINISH create app on os freedos, pkg name mpxplay :: passed",
+                    "FINISH test Mpx Play on FreeDOS :: passed",
+                    "START delete app on os ubuntu, pkg name nodejs",
+                    "FINISH delete app on os ubuntu, pkg name nodejs :: passed",
+                    "START delete app on os ubuntu, pkg name golang",
+                    "FINISH delete app on os ubuntu, pkg name golang :: passed",
+                    "START delete app on os ubuntu, pkg name python",
+                    "FINISH delete app on os ubuntu, pkg name python :: passed",
                     "START delete container ubuntu",
                     "FINISH delete container ubuntu :: passed",
-                    "START test we can get Ubuntu containers",
-                    "START create container ubuntu",
-                    "FINISH create container ubuntu :: passed",
-                    "FINISH test we can get Ubuntu containers :: passed",
                 ],
                 actual
             );

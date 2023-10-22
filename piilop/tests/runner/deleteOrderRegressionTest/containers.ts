@@ -51,17 +51,67 @@ export const createContainers = (service: FakeSaasServiceState, registry: TestRe
     );
 
     containers.registerDeleteFunc(async (_ctx, data) => {
+        // There is some nutty regression where the incoming data is wrong here.
+        if (data.os != "ubuntu") {
+            console.log(`The incoming data os is ${data.os}. HOW!?`);
+            throw new Error(`The incoming data os is ${JSON.stringify(data)}. HOW!?`);
+            //abort();
+        }
         await client.DeleteContainer(data.id);
     })
 
-    registry.registerDeleteTests(
-        containers,
-        (args) => `delete container ${args.os}`,
-        [],
-        Priority.Last,
-        "Containers",
-        { os: "ubuntu" }
-    );
+    // registry.registerDeleteTests(
+    //     containers,
+    //     (args) => `delete container ${args.os}`,
+    //     [],
+    //     Priority.Last,
+    //     "Containers",
+    //     { os: "ubuntu" }
+    // );
+
+    registry.register({
+        name: "delete container ubuntu synthetic",
+        suite: "Containers",
+        dependsOn: [],
+        priority: Priority.Last,
+        func: async (ctx: TestContext): Promise<void> => {
+            // {
+            //     const container = await containers.findData({createArgs: {os:"ubuntu"}}, ctx);
+            //     if (container.os !== "ubuntu") {
+            //         throw new Error("WTF!")
+            //     }
+            // }
+            // {
+            //     const container = await containers.findState({createArgs: {os:"ubuntu"}}, ctx);
+            //     if (container.data.os !== "ubuntu") {
+            //         throw new Error("WTF!")
+            //     }
+            // }
+            // {
+            //     const container = await containers.findStateManual({createArgs: {os:"ubuntu"}}, ctx);
+            //     if (container.data.os !== "ubuntu") {
+            //         throw new Error("WTF!")
+            //     }
+            // }
+            {
+                await containers.findDataAndCall({createArgs: {os:"ubuntu"}, searchState: (state) =>
+                    state.dependents.length == 0 && state.lockedBy == null,
+                }, ctx, (data) => {
+                    if (data.os !== "ubuntu") {
+                        throw new Error("WTF!")
+                    }
+                });
+            }
+            // {
+            //     await containers.findStateAndCall({createArgs: {os:"ubuntu"}}, ctx, (state) => {
+            //         if (state.data.os !== "ubuntu") {
+            //             throw new Error("WTF!")
+            //         }
+            //     });
+            // }
+        }
+    });
+
 
     registry.register({
         name: "test we can get Ubuntu containers",

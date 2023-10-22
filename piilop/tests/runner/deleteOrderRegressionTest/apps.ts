@@ -82,7 +82,7 @@ export const createApps = (service: FakeSaasServiceState, registry: TestRegistry
     registry.registerDeleteTests(
         apps,
         (args) => `delete app on os ${args.os}, pkg name ${args.pkgName}`,
-        dependsOn, Priority.First,
+        dependsOn, Priority.Last,
         suiteName,
         { os: "ubuntu", pkgName: "nodejs" },
         { os: "ubuntu", pkgName: "golang" },

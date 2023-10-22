@@ -189,6 +189,8 @@ export class TestRegistry<Ctx extends ITestContext> {
 
     /** Given a resource manager, registers a set of delete tests.
      * These tests just pass different create options to the resource manager.
+     * NOTE: The DSL passes `Priority.Last` here, which is what you want most
+     * of the time.
      */
     public registerDeleteTests<D extends Data & CreateOptions, CreateOptions>(
         resourceManager: ResourceManager<Ctx, D, CreateOptions>,

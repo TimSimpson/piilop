@@ -66,6 +66,7 @@ describe('when running tests',  () => {
         {
             const actual = await runTests(registry);
             chai.assert.deepEqual(
+                actual,
                 [
                     "START examples get_grandparent aws",
                     "START examples create_grandparents aws",
@@ -93,8 +94,7 @@ describe('when running tests',  () => {
                     "START examples delete_parent azure",
                     "DELETE /examples/parents TN-6, azure",
                     "FINISH examples delete_parent azure :: passed",
-                ],
-                actual
+                ]
             );
 
             const info = getResourceInfo(registry);
