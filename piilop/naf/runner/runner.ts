@@ -307,25 +307,17 @@ export class TestMain {
             const workers =  [];
             workerCount = workerCount || 1;
             if (workerCount != undefined && workerCount > 0) {
-
-                console.log("MARIO 0")
-
                 const workerLogic = async () => {
                     await (async () => {})();
-                    console.log("MARIO a")
                     while (workLeft.length > 0) {
-                        console.log("MARIO h")
                         const nextEntry = workLeft.pop();
                         await nextEntry?.entry.func(this.ctx);
-                        console.log("MARIO it got awaited?");
                     }
-                    console.log("MARIO all done")
                 };
 
                 workers.push(workerLogic());
             }
 
-            console.log("MARIO Ok now I done");
             await Promise.all(workers);
         } else {
             for (const entry of list) {

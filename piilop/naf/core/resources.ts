@@ -155,7 +155,6 @@ export class ResourceManager<
         if (this.deleteFunc == null) {
             throw new Error("deleteFunc not set");
         }
-        console.log(`MARIO heck ResourceManager.delete: data=${JSON.stringify(data)}`);
         await this.deleteFunc(ctx, data);
         this.bag.delete((state: State<D>) => {
             return state.data.id === data.id;
@@ -211,7 +210,6 @@ export class ResourceManager<
         },
         ctx: Ctx
     ): Promise<State<D>> {
-        console.log(`MARIO heck ResourceManager.findStateManual: data=${JSON.stringify(createArgs)} : searchState===undefined? ${searchState===undefined} : searchData===undefined? ${searchData === undefined}`);
         if (modifierPre === undefined) {
             modifierPre = (state: State<D>) => {
                 state.lockedBy = ctx.currentTestName();
@@ -265,7 +263,6 @@ export class ResourceManager<
         ctx: Ctx,
         f: (data: State<D>) => R
     ): Promise<R> {
-        console.log(`MARIO heck ResourceManager.findStateAndCall: data=${JSON.stringify(createArgs)}`);
         if (modifierPost === undefined) {
             modifierPost = (state: State<D>) => {
                 state.lockedBy = null;
@@ -281,7 +278,6 @@ export class ResourceManager<
             ctx
         );
         try {
-            console.log(`MARIO heck ResourceManager.findStateAndCall 2: data=${JSON.stringify(data)}`);
             const r = await f(data);
             modifierPost(data);
             return r;
@@ -344,7 +340,6 @@ export class ResourceManager<
         ctx: Ctx,
         f: (data: D) => R
     ): Promise<R> {
-        console.log(`MARIO findDataAndCall: createArgs=${JSON.stringify(options.createArgs)}`);
         return await this.findStateAndCall(options, ctx, (state) =>
             f(state.data)
         );

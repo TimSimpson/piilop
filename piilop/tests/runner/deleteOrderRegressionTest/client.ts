@@ -97,7 +97,6 @@ export class Client {
     }
 
     public async DeleteContainer(containerId: ContainerId) {
-        console.log(`MARIO getting delete container call for ${containerId}`);
         if (this.containers[containerId] === undefined) {
             throw new Error(`container ID ${containerId} not found!`);
         }
