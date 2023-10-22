@@ -6,12 +6,16 @@ module.exports = {
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
   ],
+  parserOptions: {
+    project: "./tsconfig.json"
+  },
   overrides: [
     {
       files: ["*.ts"],
       rules: {
         '@typescript-eslint/no-floating-promises': ['error'],
+        '@typescript-eslint/no-misued-promises': ['error'],
       },
     },
-  ],
+  ]
 };

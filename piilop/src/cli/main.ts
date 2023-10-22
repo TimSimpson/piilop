@@ -66,7 +66,7 @@ program
     .command("test")
     .option("-t, --testName <name>", "test name")
     .action(async (options) => {
-        let name = options.testName;
+        const name = options.testName;
         await withSaveFile(() => runTests(name));
     });
 
