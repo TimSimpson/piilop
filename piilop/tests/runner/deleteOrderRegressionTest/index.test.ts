@@ -103,5 +103,16 @@ describe("order / resource fetching should work with delete", () => {
                 actual
             );
         }
+
+        const remainingOs = Object.values(service.getContainers()).map(c => c.operatingSystem).join(" ");
+
+        // test that Ubuntu is the only container deleted.
+        // There was a bug due to not creating the function to look for
+        // containers correclty in the "delete" test that caused a different container
+        // to be deleted instead.
+        chai.assert.include(remainingOs, "windows");
+        chai.assert.include(remainingOs, "macos");
+        chai.assert.include(remainingOs, "freedos");
+        chai.assert.notInclude(remainingOs, "ubuntu");
     })
 })
