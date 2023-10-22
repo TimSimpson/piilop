@@ -27,6 +27,9 @@ fmt: ensure_installed
 build: ensure_installed
     @yarn run tsc
 
+# run the self tests
+test:
+    @yarn run test
 
 run *args='': ensure_installed
     @yarn run run-tests  {{ args }}

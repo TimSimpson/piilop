@@ -11,7 +11,7 @@
         "checks:ts": "tsc --noEmit",
         "ci": "run-s ci:formatting checks:lint checks:ts",
         "ci:formatting": "prettier --check \"src/**/**/!(*.d).{ts,tsx,css,json,html}\"",
-        "test": "ts-jest"
+        "test": "jest"
     },
     "prettier": {
         "tabWidth": 4

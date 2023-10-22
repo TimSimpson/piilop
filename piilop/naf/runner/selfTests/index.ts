@@ -1,1 +1,0 @@
-export { selfTests } from "./exampleResourcesTests";
