@@ -13,8 +13,8 @@
         "jsx": "react",
         "jsxFactory": "h",
         "strict": true,
-        "importsNotUsedAsValues": "error",
         "outDir": "./dist",
+        "sourceMap": true,
         "allowJs": true,
         "baseUrl": "./",
         "paths": {
