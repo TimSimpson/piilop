@@ -19,6 +19,7 @@ ensure_installed:
 # run checks
 check: ensure_installed
     @yarn run checks:ts
+    @yarn run checks:lint
 
 # run checks
 fmt: ensure_installed

@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { Command } from "@commander-js/extra-typings";
 import { clear, info, load, runTests, save, status } from "src/tests";
-import { selfTests } from "../../naf/selfTests";
 
 const program = new Command("naft");
 
@@ -43,18 +42,6 @@ program
     .description("show all resources the test knows about")
     .action(async () => {
         await withSaveFile(() => info());
-    });
-program
-    .command("selfTests")
-    .description("run self tests (tests the tests)")
-    .action(async () => {
-        await selfTests();
-    });
-program
-    .command("testBase")
-    .description("run testBase")
-    .action(async () => {
-        await selfTests();
     });
 program
     .command("status")
