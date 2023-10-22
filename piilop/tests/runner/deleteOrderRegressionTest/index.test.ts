@@ -52,8 +52,6 @@ describe("order / resource fetching should work with delete", () => {
                     "START create container windows",
                     "FINISH create container windows :: passed",
                     "START test we can get Ubuntu containers",
-                    "START create container ubuntu",
-                    "FINISH create container ubuntu :: passed",
                     "FINISH test we can get Ubuntu containers :: passed",
                     "START delete container ubuntu",
                     "FINISH delete container ubuntu :: passed",

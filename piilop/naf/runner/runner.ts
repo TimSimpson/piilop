@@ -291,45 +291,51 @@ export class TestMain {
             createTestRunnerItem
         );
 
-        let workLeft: core.TestRunnerItem<TestContext>[] = [];
-        for (const entry of list) {
-            if (entry.entry.name.startsWith(name)) {
-                workLeft.push(entry);
-                // await entry.entry.func(this.ctx);
+        const parallel = true;
+
+        if (parallel) {
+            let workLeft: core.TestRunnerItem<TestContext>[] = [];
+            for (const entry of list) {
+                if (entry.entry.name.startsWith(name)) {
+                    workLeft.push(entry);
+                    // await entry.entry.func(this.ctx);
+                }
+            }
+
+            workLeft.reverse();
+
+            const workers =  [];
+            workerCount = workerCount || 1;
+            if (workerCount != undefined && workerCount > 0) {
+
+                console.log("MARIO 0")
+
+                const workerLogic = async () => {
+                    await (async () => {})();
+                    console.log("MARIO a")
+                    while (workLeft.length > 0) {
+                        console.log("MARIO h")
+                        const nextEntry = workLeft.pop();
+                        await nextEntry?.entry.func(this.ctx);
+                        console.log("MARIO it got awaited?");
+                    }
+                    console.log("MARIO all done")
+                };
+
+                workers.push(workerLogic());
+            }
+
+            console.log("MARIO Ok now I done");
+            await Promise.all(workers);
+        } else {
+            for (const entry of list) {
+                if (entry.entry.name.startsWith(name)) {
+                    await entry.entry.func(this.ctx);
+                }
             }
         }
 
-        workLeft.reverse();
 
-        const workers =  [];
-        workerCount = workerCount || 1;
-        if (workerCount != undefined && workerCount > 0) {
-
-            console.log("MARIO 0")
-
-            const workerLogic = async () => {
-                await (async () => {})();
-                console.log("MARIO a")
-                while (workLeft.length > 0) {
-                    console.log("MARIO h")
-                    const nextEntry = workLeft.pop();
-                    await nextEntry?.entry.func(this.ctx);
-                    console.log("MARIO it got awaited?");
-                }
-                console.log("MARIO all done")
-            };
-
-            workers.push(workerLogic());
-        }
-
-        console.log("MARIO Ok now I done");
-        await Promise.all(workers);
-
-        // for (const entry of list) {
-        //     if (entry.entry.name.startsWith(name)) {
-        //         await entry.entry.func(this.ctx);
-        //     }
-        // }
         console.log("Done");
     }
 
