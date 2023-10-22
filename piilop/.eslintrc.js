@@ -14,7 +14,7 @@ module.exports = {
       files: ["*.ts"],
       rules: {
         '@typescript-eslint/no-floating-promises': ['error'],
-        '@typescript-eslint/no-misued-promises': ['error'],
+        '@typescript-eslint/no-misused-promises': ['error'],
       },
     },
   ]
