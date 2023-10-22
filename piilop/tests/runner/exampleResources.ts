@@ -1,4 +1,9 @@
-import { Priority, ResourceManager, TestContext, TestRegistry } from "../../naf/runner";
+import {
+    Priority,
+    ResourceManager,
+    TestContext,
+    TestRegistry,
+} from "../../naf/runner";
 import * as chai from "chai";
 
 // In NAF, resources need the following:
@@ -38,7 +43,7 @@ export const createGrandParents = (registry: TestRegistry): Grandparents => {
         (args) => `examples create_grandparents ${args.favoriteProvider}`,
         async (
             ctx: TestContext,
-            args: NewGrandparentArgs
+            args: NewGrandparentArgs,
         ): Promise<GrandparentData> => {
             // Inside this code, we are running a test called `example create_grandparents`.
             // This "test" may run multiple times.
@@ -50,7 +55,7 @@ export const createGrandParents = (registry: TestRegistry): Grandparents => {
                 favoriteProvider: args.favoriteProvider,
             };
             return grandparent;
-        }
+        },
     );
 
     // now we'll register a test that gets
@@ -89,7 +94,7 @@ export const createGrandParents = (registry: TestRegistry): Grandparents => {
                 (grandparent: GrandparentData) => {
                     ctx.log(`GET examples/grandparents/${grandparent.id}`);
                     chai.assert.equal(grandparent.favoriteProvider, "aws");
-                }
+                },
             );
         },
     });
@@ -149,7 +154,7 @@ export const createParents = (registry: TestRegistry): Parents => {
                     ctx,
                     (state) => {
                         ctx.log(
-                            `POST /examples/parents (using grandparent id=${state.data.id}, ${createArgs.favoriteProvider}, ${state.data.favoriteProvider})`
+                            `POST /examples/parents (using grandparent id=${state.data.id}, ${createArgs.favoriteProvider}, ${state.data.favoriteProvider})`,
                         );
                         const result = {
                             favoriteProvider: createArgs.favoriteProvider,
@@ -160,7 +165,7 @@ export const createParents = (registry: TestRegistry): Parents => {
                         ctx.log(`   result id = ${result.id}`);
                         state.dependents.push(`parents-${result.id}`);
                         return result;
-                    }
+                    },
                 );
             },
         },
@@ -178,13 +183,13 @@ export const createParents = (registry: TestRegistry): Parents => {
             // systems it's not even possible to delete resources with children)
             func: async (ctx, data) => {
                 ctx.log(
-                    `DELETE /examples/parents ${data.id}, ${data.favoriteProvider}`
+                    `DELETE /examples/parents ${data.id}, ${data.favoriteProvider}`,
                 );
                 // politely inform the grandparent resource we're no longer
                 // dependent on it
                 grandparents.removeDependent(
                     (d) => d.id == data.grandparentId,
-                    `parents-${data.id}`
+                    `parents-${data.id}`,
                 );
             },
         },
@@ -203,7 +208,7 @@ export const createParents = (registry: TestRegistry): Parents => {
                 ctx,
                 (data) => {
                     ctx.log(`GET /examples/parents ${data.id}`);
-                }
+                },
             );
         },
     });
@@ -248,7 +253,7 @@ export const createChildren = (registry: TestRegistry): Children => {
                     ctx,
                     (state) => {
                         ctx.log(
-                            `POST /examples/children (using parent id=${state.data.id})`
+                            `POST /examples/children (using parent id=${state.data.id})`,
                         );
                         const result = {
                             favoriteProvider: createArgs.favoriteProvider,
@@ -259,7 +264,7 @@ export const createChildren = (registry: TestRegistry): Children => {
                         ctx.log(`   result id = ${result.id}`);
                         state.dependents.push(`children-${result.id}`);
                         return result;
-                    }
+                    },
                 );
             },
         },
@@ -274,7 +279,7 @@ export const createChildren = (registry: TestRegistry): Children => {
                 ctx.log(`DELETE /examples/children ${data.id}`);
                 parents.removeDependent(
                     (d) => d.id == data.parentId,
-                    `children-${data.id}`
+                    `children-${data.id}`,
                 );
             },
         },
@@ -291,7 +296,7 @@ export const createChildren = (registry: TestRegistry): Children => {
                 ctx,
                 (data) => {
                     ctx.log(`GET /examples/child ${data.id}`);
-                }
+                },
             );
         },
     });

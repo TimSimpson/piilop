@@ -5,7 +5,7 @@ import * as runner from "../runner";
 
 type fnAddCreateTests = <
     Data extends runner.Data & CreateOptions,
-    CreateOptions
+    CreateOptions,
 >(
     resourceManager: runner.ResourceManager<Data, CreateOptions>,
     nameFunc: (arg: CreateOptions) => string,
@@ -22,12 +22,12 @@ type fnAddDeleteTestsRM<CreateOptions> = fnAddCreateTestsRM<CreateOptions>;
 type fnDependsOn = (...names: string[]) => void;
 type fnResource = <Data extends runner.Data & CreateOptions, CreateOptions>(
     resourceName: string,
-    body: (r: ResourceBuilder<Data, CreateOptions>) => void
+    body: (r: ResourceBuilder<Data, CreateOptions>) => void,
 ) => runner.ResourceManager<Data, CreateOptions>;
 type fnSuite = (name: string, body: () => void) => void;
 type fnTest = (
     name: string,
-    func: (ctx: runner.TestContext) => Promise<void>
+    func: (ctx: runner.TestContext) => Promise<void>,
 ) => void;
 
 export interface DslFuncs {
@@ -43,24 +43,24 @@ export interface DslFuncs {
 
 export interface ResourceBuilder<
     Data extends runner.Data & CreateOptions,
-    CreateOptions
+    CreateOptions,
 > {
     create: (
-        func: (ctx: runner.TestContext, args: CreateOptions) => Promise<Data>
+        func: (ctx: runner.TestContext, args: CreateOptions) => Promise<Data>,
     ) => void;
 
     createWrapped: (
         nameFunc: (arg: CreateOptions) => string,
-        func: (ctx: runner.TestContext, args: CreateOptions) => Promise<Data>
+        func: (ctx: runner.TestContext, args: CreateOptions) => Promise<Data>,
     ) => void;
 
     delete: (
-        func: (ctx: runner.TestContext, data: Data) => Promise<void>
+        func: (ctx: runner.TestContext, data: Data) => Promise<void>,
     ) => void;
 
     deleteWrapped: (
         nameFunc: (arg: CreateOptions) => string,
-        func: (ctx: runner.TestContext, data: Data) => Promise<void>
+        func: (ctx: runner.TestContext, data: Data) => Promise<void>,
     ) => void;
 
     addCreateTests: fnAddCreateTestsRM<CreateOptions>;
@@ -71,7 +71,7 @@ export interface ResourceBuilder<
 export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
     const globalTest: fnTest = (
         name: string,
-        func: (ctx: runner.TestContext) => Promise<void>
+        func: (ctx: runner.TestContext) => Promise<void>,
     ) => {
         registry.register({
             dependsOn: [],
@@ -84,7 +84,7 @@ export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
 
     const globalAddCreateTests: fnAddCreateTests = <
         Data extends runner.Data & CreateOptions,
-        CreateOptions
+        CreateOptions,
     >(
         resourceManager: runner.ResourceManager<Data, CreateOptions>,
         nameFunc: (arg: CreateOptions) => string,
@@ -96,13 +96,13 @@ export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
             [],
             runner.Priority.First,
             "",
-            ...opts
+            ...opts,
         );
     };
 
     const globalAddDeleteTests: fnAddCreateTests = <
         Data extends runner.Data & CreateOptions,
-        CreateOptions
+        CreateOptions,
     >(
         resourceManager: runner.ResourceManager<Data, CreateOptions>,
         nameFunc: (arg: CreateOptions) => string,
@@ -114,7 +114,7 @@ export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
             [],
             runner.Priority.First,
             "",
-            ...opts
+            ...opts,
         );
     };
 
@@ -131,13 +131,13 @@ export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
 
     const globalResource: fnResource = <
         Data extends runner.Data & CreateOptions,
-        CreateOptions
+        CreateOptions,
     >(
         resourceName: string,
-        body: (r: ResourceBuilder<Data, CreateOptions>) => void
+        body: (r: ResourceBuilder<Data, CreateOptions>) => void,
     ): runner.ResourceManager<Data, CreateOptions> => {
         const builder = new ResourceBuilderImpl<Data, CreateOptions>(
-            resourceName
+            resourceName,
         );
         const oldGlobals = currentFuncs;
         try {
@@ -196,10 +196,10 @@ export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
 
         resource<Data extends runner.Data & CreateOptions, CreateOptions>(
             resourceName: string,
-            body: (r: ResourceBuilder<Data, CreateOptions>) => void
+            body: (r: ResourceBuilder<Data, CreateOptions>) => void,
         ): runner.ResourceManager<Data, CreateOptions> {
             const builder = new ResourceBuilderImpl<Data, CreateOptions>(
-                resourceName
+                resourceName,
             );
             const oldFuncs = currentFuncs;
             try {
@@ -235,7 +235,7 @@ export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
 
         _addCreateTests<
             Data extends runner.Data & CreateOptions,
-            CreateOptions
+            CreateOptions,
         >(
             resourceManager: runner.ResourceManager<Data, CreateOptions>,
             nameFunc: (arg: CreateOptions) => string,
@@ -251,13 +251,13 @@ export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
                 this.dependsOnFld,
                 runner.Priority.First,
                 this.suiteName,
-                ...opts
+                ...opts,
             );
         }
 
         _addDeleteTests<
             Data extends runner.Data & CreateOptions,
-            CreateOptions
+            CreateOptions,
         >(
             resourceManager: runner.ResourceManager<Data, CreateOptions>,
             nameFunc: (arg: CreateOptions) => string,
@@ -273,14 +273,14 @@ export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
                 this.dependsOnFld,
                 runner.Priority.Last,
                 this.suiteName,
-                ...opts
+                ...opts,
             );
         }
     }
 
     class ResourceBuilderImpl<
         Data extends runner.Data & CreateOptions,
-        CreateOptions
+        CreateOptions,
     > extends SuiteBuilder {
         resourceManager: runner.ResourceManager<Data, CreateOptions>;
 
@@ -295,8 +295,8 @@ export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
         create(
             func: (
                 ctx: runner.TestContext,
-                args: CreateOptions
-            ) => Promise<Data>
+                args: CreateOptions,
+            ) => Promise<Data>,
         ) {
             this.resourceManager.registerCreateFunc(func);
         }
@@ -305,15 +305,15 @@ export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
             nameFunc: (arg: CreateOptions) => string,
             func: (
                 ctx: runner.TestContext,
-                args: CreateOptions
-            ) => Promise<Data>
+                args: CreateOptions,
+            ) => Promise<Data>,
         ) {
             this.resourceManager.registerWrappedCreateFunc(
                 (arg: CreateOptions) => {
                     const name = nameFunc(arg);
                     return `${this.suiteName} ${name}`;
                 },
-                func
+                func,
             );
         }
 
@@ -323,14 +323,14 @@ export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
 
         deleteWrapped(
             nameFunc: (arg: CreateOptions) => string,
-            func: (ctx: runner.TestContext, data: Data) => Promise<void>
+            func: (ctx: runner.TestContext, data: Data) => Promise<void>,
         ) {
             this.resourceManager.registerWrappedDeleteFunc(
                 (arg: CreateOptions) => {
                     const name = nameFunc(arg);
                     return `${this.suiteName} ${name}`;
                 },
-                func
+                func,
             );
         }
 
@@ -352,7 +352,7 @@ export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
     return {
         addCreateTests: <
             Data extends runner.Data & CreateOptions,
-            CreateOptions
+            CreateOptions,
         >(
             resourceManager: runner.ResourceManager<Data, CreateOptions>,
             nameFunc: (arg: CreateOptions) => string,
@@ -362,7 +362,7 @@ export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
         },
         addDeleteTests: <
             Data extends runner.Data & CreateOptions,
-            CreateOptions
+            CreateOptions,
         >(
             resourceManager: runner.ResourceManager<Data, CreateOptions>,
             nameFunc: (arg: CreateOptions) => string,
@@ -375,7 +375,7 @@ export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
         },
         resource: <Data extends runner.Data & CreateOptions, CreateOptions>(
             resourceName: string,
-            body: (r: ResourceBuilder<Data, CreateOptions>) => void
+            body: (r: ResourceBuilder<Data, CreateOptions>) => void,
         ): runner.ResourceManager<Data, CreateOptions> => {
             return currentFuncs.resource(resourceName, body);
         },
@@ -384,7 +384,7 @@ export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
         },
         test: (
             name: string,
-            func: (ctx: runner.TestContext) => Promise<void>
+            func: (ctx: runner.TestContext) => Promise<void>,
         ) => {
             currentFuncs.test(name, func);
         },

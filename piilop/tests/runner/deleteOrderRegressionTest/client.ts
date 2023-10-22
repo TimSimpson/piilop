@@ -1,34 +1,33 @@
-
 // Represents an rich client for some service that can provision containers and
 // install apps on those containers.
 
-const { randomUUID } = require('crypto');
-import {setTimeout} from 'timers/promises';
+const { randomUUID } = require("crypto");
+import { setTimeout } from "timers/promises";
 
 type AppId = string;
 
 type App = {
-    parentContainer: ContainerId,
-    id: AppId,
-    pkgName: string,
+    parentContainer: ContainerId;
+    id: AppId;
+    pkgName: string;
 };
 
 type ContainerId = string;
 
 type Container = {
-    apps: { [key: string]: App },
-    id : ContainerId,
-    operatingSystem: string,
-}
+    apps: { [key: string]: App };
+    id: ContainerId;
+    operatingSystem: string;
+};
 
-type ContainerLookup = {[key:string]: Container};
+type ContainerLookup = { [key: string]: Container };
 
 const fakeSleep = async () => {
     setTimeout(10);
-}
+};
 
 export class FakeSaasServiceState {
-    state: {[key:string]: Container}
+    state: { [key: string]: Container };
 
     constructor() {
         this.state = {};
@@ -52,7 +51,7 @@ export class FakeSaasServiceState {
 }
 
 export class Client {
-    containers: ContainerLookup
+    containers: ContainerLookup;
 
     constructor(state: ContainerLookup) {
         this.containers = state;
@@ -60,25 +59,29 @@ export class Client {
 
     public CreateApp(containerId: ContainerId, pkgName: string): AppId {
         const container = this.containers[containerId];
-        console.log(`installing an app on container ${containerId} (os = ${container.operatingSystem}, pkg = ${pkgName})`);
+        console.log(
+            `installing an app on container ${containerId} (os = ${container.operatingSystem}, pkg = ${pkgName})`,
+        );
         const apps = container.apps;
         const id: AppId = randomUUID();
         const app = {
             id,
             parentContainer: containerId,
             pkgName,
-         };
+        };
         apps[id] = app;
         return id;
     }
 
-    public async CreateContainer(operatingSystem: string): Promise<ContainerId> {
+    public async CreateContainer(
+        operatingSystem: string,
+    ): Promise<ContainerId> {
         const id = randomUUID();
         console.log(`creating a container ${id} with os ${operatingSystem}`);
         this.containers[id] = {
             apps: {},
             id,
-            operatingSystem
+            operatingSystem,
         };
         await fakeSleep();
         return id;
@@ -91,7 +94,9 @@ export class Client {
         if (this.containers[containerId].apps[appId] === undefined) {
             throw new Error(`app ID ${appId} not found!`);
         }
-        console.log(`deleting app ${appId} (container os=${this.containers[containerId].operatingSystem}, pkg=${this.containers[containerId].apps[appId].pkgName})`);
+        console.log(
+            `deleting app ${appId} (container os=${this.containers[containerId].operatingSystem}, pkg=${this.containers[containerId].apps[appId].pkgName})`,
+        );
         await fakeSleep();
         delete this.containers[containerId].apps[appId];
     }
@@ -101,20 +106,22 @@ export class Client {
             throw new Error(`container ID ${containerId} not found!`);
         }
         const c = this.containers[containerId];
-        const appCount = Object.values(c.apps).length
-        console.log(`deleting container ${containerId} (os=${c.operatingSystem}, app count=${appCount})`);
+        const appCount = Object.values(c.apps).length;
+        console.log(
+            `deleting container ${containerId} (os=${c.operatingSystem}, app count=${appCount})`,
+        );
         await fakeSleep();
         delete this.containers[containerId];
     }
 
-    public async GetApp(containerId: ContainerId, appId: AppId) : Promise<App> {
+    public async GetApp(containerId: ContainerId, appId: AppId): Promise<App> {
         const container = this.containers[containerId];
         const apps = container.apps;
         await fakeSleep();
         return apps[appId];
     }
 
-    public async GetContainer(containerId: ContainerId) : Promise<Container> {
+    public async GetContainer(containerId: ContainerId): Promise<Container> {
         await fakeSleep();
         return this.containers[containerId];
     }

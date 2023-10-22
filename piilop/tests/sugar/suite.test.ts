@@ -44,8 +44,6 @@ describe("the suite keyword makes it easy to create simple tests and ordering", 
 
         // const entries = registry.getEntries();
         // console.log(JSON.stringify(entries));
-    })
-    test("resources test", async () => {
-
-    })
-})
+    });
+    test("resources test", async () => {});
+});

@@ -9,7 +9,7 @@ export { Priority } from "../core/registry";
 
 export class ResourceManager<
     D extends core.Data & CreateOptions,
-    CreateOptions
+    CreateOptions,
 > extends core.ResourceManager<TestContext, D, CreateOptions> {}
 export class TestRegistry extends core.TestRegistry<TestContext> {}
 
@@ -99,7 +99,7 @@ export class TestContextOpts {
 
     constructor(
         onTestStarted: (n: string) => void,
-        onTestFinished: (n: string, t: TestStatus) => void
+        onTestFinished: (n: string, t: TestStatus) => void,
     ) {
         this.thread = new TestStack();
         this.logs = [];
@@ -160,7 +160,7 @@ export class TestContext {
 
     public async run<R>(
         testName: string,
-        testFunc: core.TestContextFunc<TestContext, R, any>
+        testFunc: core.TestContextFunc<TestContext, R, any>,
     ): Promise<R> {
         this.opts.thread.startTest(testName);
         this.opts.onTestStarted(testName);
@@ -173,13 +173,13 @@ export class TestContext {
         } catch (err) {
             if (stackDepth == this.opts.thread.currentDepth()) {
                 this.log(
-                    `TEST FAILED!\n\ttest: ${this.opts.thread.breadCrumbs()}\n\terror:${err}`
+                    `TEST FAILED!\n\ttest: ${this.opts.thread.breadCrumbs()}\n\terror:${err}`,
                 );
                 this.opts.thread.finishTest(testName, "failed");
                 this.opts.onTestFinished(testName, "failed");
             } else {
                 this.log(
-                    `TEST SKIPPED:\n\ttest: ${this.opts.thread.breadCrumbs()}`
+                    `TEST SKIPPED:\n\ttest: ${this.opts.thread.breadCrumbs()}`,
                 );
                 this.opts.thread.finishTest(testName, "skipped");
                 this.opts.onTestFinished(testName, "skipped");
@@ -257,11 +257,11 @@ export class TestMain {
         this.registry = registry;
         this.list = core.createRunnerList<TestContext, TestRunnerItem>(
             registry.getEntries(),
-            createTestRunnerItem
+            createTestRunnerItem,
         );
         const opts = new TestContextOpts(
             (name) => this.startTest(name),
-            (n, s) => this.finishTest(n, s)
+            (n, s) => this.finishTest(n, s),
         );
         this.ctx = new TestContext(opts);
         this.depth = 1;
@@ -288,7 +288,7 @@ export class TestMain {
 
         const list: core.TestRunnerItem<TestContext>[] = core.createRunnerList(
             this.registry.getEntries(),
-            createTestRunnerItem
+            createTestRunnerItem,
         );
 
         const parallel = true;
@@ -304,9 +304,9 @@ export class TestMain {
 
             workLeft.reverse();
 
-            const workers : Promise<void>[] =  [];
+            const workers: Promise<void>[] = [];
             workerCount = workerCount || 1;
-            for (let i = 0; i < workerCount; i ++) {
+            for (let i = 0; i < workerCount; i++) {
                 const workerLogic = async () => {
                     await (async () => {})();
                     while (workLeft.length > 0) {
@@ -318,7 +318,6 @@ export class TestMain {
                 workers.push(workerLogic());
             }
 
-
             await Promise.all(workers);
         } else {
             for (const entry of list) {
@@ -327,7 +326,6 @@ export class TestMain {
                 }
             }
         }
-
 
         console.log("Done");
     }
@@ -340,7 +338,7 @@ export class TestMain {
         }
         const list = core.createRunnerList(
             this.registry.getEntries(),
-            createTestRunnerItem
+            createTestRunnerItem,
         );
         for (const entry of list) {
             shower(`${entry.entry.name}`);

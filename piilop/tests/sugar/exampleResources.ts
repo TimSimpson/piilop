@@ -15,7 +15,7 @@ type Grandparents = runner.ResourceManager<GrandparentData, NewGrandparentArgs>;
 export const asyncAction = async () => {};
 
 export const createGrandParentsUsingWrappedCreateAndDeletes = (
-    registry: runner.TestRegistry
+    registry: runner.TestRegistry,
 ): Grandparents => {
     const { resource, suite, test } = dsl.createDslFuncs(registry);
 
@@ -27,7 +27,7 @@ export const createGrandParentsUsingWrappedCreateAndDeletes = (
                     `create_grandparents ${args.favoriteProvider}`,
                 async (
                     ctx: runner.TestContext,
-                    args: NewGrandparentArgs
+                    args: NewGrandparentArgs,
                 ): Promise<GrandparentData> => {
                     ctx.log(`POST examples/grandparents`);
                     await asyncAction();
@@ -37,7 +37,7 @@ export const createGrandParentsUsingWrappedCreateAndDeletes = (
                         favoriteProvider: args.favoriteProvider,
                     };
                     return grandparent;
-                }
+                },
             );
 
             r.deleteWrapped(
@@ -45,9 +45,9 @@ export const createGrandParentsUsingWrappedCreateAndDeletes = (
                     `delete_grandparents ${args.favoriteProvider}`,
                 async (ctx, data) => {
                     ctx.log(`DELETE examples/grandparents/${data.id}`);
-                }
+                },
             );
-        }
+        },
     );
 
     suite("grandparents", () => {
@@ -81,7 +81,7 @@ export const createGrandParentsUsingWrappedCreateAndDeletes = (
                 (grandparent: GrandparentData) => {
                     ctx.log(`GET examples/grandparents/${grandparent.id}`);
                     chai.assert.equal(grandparent.favoriteProvider, "aws");
-                }
+                },
             );
         });
     });
@@ -90,7 +90,7 @@ export const createGrandParentsUsingWrappedCreateAndDeletes = (
 };
 
 export const createGrandParents = (
-    registry: runner.TestRegistry
+    registry: runner.TestRegistry,
 ): Grandparents => {
     const { resource, suite, test } = dsl.createDslFuncs(registry);
 
@@ -100,7 +100,7 @@ export const createGrandParents = (
             r.create(
                 async (
                     ctx: runner.TestContext,
-                    args: NewGrandparentArgs
+                    args: NewGrandparentArgs,
                 ): Promise<GrandparentData> => {
                     ctx.log(`POST examples/grandparents`);
                     await asyncAction();
@@ -110,13 +110,13 @@ export const createGrandParents = (
                         favoriteProvider: args.favoriteProvider,
                     };
                     return grandparent;
-                }
+                },
             );
 
             r.delete(async (ctx, data) => {
                 ctx.log(`DELETE examples/grandparents/${data.id}`);
             });
-        }
+        },
     );
 
     suite("grandparents", () => {
@@ -150,7 +150,7 @@ export const createGrandParents = (
                 (grandparent: GrandparentData) => {
                     ctx.log(`GET examples/grandparents/${grandparent.id}`);
                     chai.assert.equal(grandparent.favoriteProvider, "aws");
-                }
+                },
             );
         });
     });
@@ -180,14 +180,8 @@ type Parents = runner.ResourceManager<ParentData, NewParentArgs>;
 export const createParents = (registry: runner.TestRegistry): Parents => {
     const grandparents = createGrandParents(registry);
 
-    const {
-        addCreateTests,
-        addDeleteTests,
-        dependsOn,
-        resource,
-        suite,
-        test,
-    } = dsl.createDslFuncs(registry);
+    const { addCreateTests, addDeleteTests, dependsOn, resource, suite, test } =
+        dsl.createDslFuncs(registry);
 
     const parents = resource<ParentData, NewParentArgs>("parents", (r) => {
         dependsOn("grandparents");
@@ -195,7 +189,7 @@ export const createParents = (registry: runner.TestRegistry): Parents => {
         r.create(
             async (
                 ctx: runner.TestContext,
-                createArgs: NewParentArgs
+                createArgs: NewParentArgs,
             ): Promise<ParentData> => {
                 // here we use the grandparent's resource to get a grand parent
                 // first. We use `findState` because we have to mark the fact
@@ -207,7 +201,7 @@ export const createParents = (registry: runner.TestRegistry): Parents => {
                     ctx,
                     (state) => {
                         ctx.log(
-                            `POST /examples/parents (using grandparent id=${state.data.id}, ${createArgs.favoriteProvider}, ${state.data.favoriteProvider})`
+                            `POST /examples/parents (using grandparent id=${state.data.id}, ${createArgs.favoriteProvider}, ${state.data.favoriteProvider})`,
                         );
                         const result = {
                             favoriteProvider: createArgs.favoriteProvider,
@@ -218,20 +212,20 @@ export const createParents = (registry: runner.TestRegistry): Parents => {
                         ctx.log(`   result id = ${result.id}`);
                         state.dependents.push(`parents-${result.id}`);
                         return result;
-                    }
+                    },
                 );
-            }
+            },
         );
 
         r.delete(async (ctx, data) => {
             ctx.log(
-                `DELETE /examples/parents ${data.id}, ${data.favoriteProvider}`
+                `DELETE /examples/parents ${data.id}, ${data.favoriteProvider}`,
             );
             // politely inform the grandparent resource we're no longer
             // dependent on it
             grandparents.removeDependent(
                 (d) => d.id == data.grandparentId,
-                `parents-${data.id}`
+                `parents-${data.id}`,
             );
         });
     });
@@ -243,13 +237,13 @@ export const createParents = (registry: runner.TestRegistry): Parents => {
                 (args: NewParentArgs) =>
                     `create_parent ${args.favoriteProvider}`,
                 { favoriteProvider: "aws" },
-                { favoriteProvider: "azure" }
+                { favoriteProvider: "azure" },
             );
         addDeleteTests(
             parents,
             (args: NewParentArgs) => `delete_parent ${args.favoriteProvider}`,
             { favoriteProvider: "aws" },
-            { favoriteProvider: "azure" }
+            { favoriteProvider: "azure" },
         );
         // priority(Priority.Normal)
         test("get_parent aws", async (ctx) => {
@@ -258,7 +252,7 @@ export const createParents = (registry: runner.TestRegistry): Parents => {
                 ctx,
                 (data) => {
                     ctx.log(`GET /examples/parents ${data.id}`);
-                }
+                },
             );
         });
     });
@@ -296,7 +290,7 @@ export const createChildren = (registry: runner.TestRegistry): Children => {
                     ctx,
                     (state) => {
                         ctx.log(
-                            `POST /examples/children (using parent id=${state.data.id})`
+                            `POST /examples/children (using parent id=${state.data.id})`,
                         );
                         const result = {
                             favoriteProvider: createArgs.favoriteProvider,
@@ -307,26 +301,26 @@ export const createChildren = (registry: runner.TestRegistry): Children => {
                         ctx.log(`   result id = ${result.id}`);
                         state.dependents.push(`children-${result.id}`);
                         return result;
-                    }
+                    },
                 );
             });
             r.addCreateTests(
                 (args) => `create_child ${args.favoriteProvider}`,
                 { favoriteProvider: "aws" },
-                { favoriteProvider: "azure" }
+                { favoriteProvider: "azure" },
             );
             r.delete(async (ctx, data) => {
                 ctx.log(`DELETE /examples/children ${data.id}`);
                 parents.removeDependent(
                     (d) => d.id == data.parentId,
-                    `children-${data.id}`
+                    `children-${data.id}`,
                 );
             });
 
             r.addDeleteTests(
                 (args) => `delete_child ${args.favoriteProvider}`,
                 { favoriteProvider: "aws" },
-                { favoriteProvider: "azure" }
+                { favoriteProvider: "azure" },
             );
 
             test("get_child aws", async (ctx) => {
@@ -335,14 +329,14 @@ export const createChildren = (registry: runner.TestRegistry): Children => {
                     ctx,
                     (data) => {
                         ctx.log(`GET /examples/child ${data.id}`);
-                    }
+                    },
                 );
             });
 
             test("get_child azure", async (ctx) => {
                 const child = await children.findData(
                     { createArgs: { favoriteProvider: "azure" } },
-                    ctx
+                    ctx,
                 );
                 ctx.log(`GET /examples/child ${child.id}`);
             });
@@ -350,11 +344,11 @@ export const createChildren = (registry: runner.TestRegistry): Children => {
             test("get_child azure 2", async (ctx) => {
                 const child = await children.findData(
                     { createArgs: { favoriteProvider: "azure" } },
-                    ctx
+                    ctx,
                 );
                 ctx.log(`GET /examples/child ${child.id}`);
             });
-        }
+        },
     );
     return children;
 };

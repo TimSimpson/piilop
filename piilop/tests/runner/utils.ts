@@ -43,7 +43,7 @@ export const createSelfTestMain = (registry: TestRegistry): TestMain => {
 // creates a new "main", runs the tests, and returns the ctx logs
 export const runTests = async (
     registry: TestRegistry,
-    test?: string
+    test?: string,
 ): Promise<string[]> => {
     const main = createSelfTestMain(registry);
     await main.runTest(test);

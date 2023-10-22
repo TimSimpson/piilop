@@ -1,5 +1,3 @@
-
-
 // this is mainly used to test if test data matches with the "createArgs" argument
 export const objectIsSubsetOf = (subset: any, superset: any): boolean => {
     for (const [key, value] of Object.entries(subset)) {
@@ -8,4 +6,4 @@ export const objectIsSubsetOf = (subset: any, superset: any): boolean => {
         }
     }
     return true;
-}
+};

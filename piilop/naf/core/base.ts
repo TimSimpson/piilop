@@ -32,13 +32,13 @@ const wasWrapped = Symbol("testContextWrapped");
 type WrappedFunction<
     C extends ITestContext,
     R,
-    T extends any[]
+    T extends any[],
 > = TestContextFunc<C, R, T> & {
     [wasWrapped]: true;
 };
 
 export const isWrapped = <C extends ITestContext, R, T extends any[]>(
-    fn: TestContextFunc<C, R, T>
+    fn: TestContextFunc<C, R, T>,
 ): fn is WrappedFunction<C, R, T> => wasWrapped in fn;
 
 /**
@@ -48,7 +48,7 @@ export const isWrapped = <C extends ITestContext, R, T extends any[]>(
  */
 export const wrap = <C extends ITestContext, R, T extends any[]>(
     fn: TestContextFunc<C, R, T>,
-    wrapArgs?: WrapArgs<T>
+    wrapArgs?: WrapArgs<T>,
 ): WrappedFunction<C, R, T> => {
     if (isWrapped<C, R, T>(fn)) return fn;
 

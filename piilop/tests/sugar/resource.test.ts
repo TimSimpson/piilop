@@ -31,10 +31,10 @@ describe("the resource keyword makes it easy to create resources", () => {
                     "GET examples/grandparents/TN-0",
                     "FINISH grandparents get_grandparent aws :: passed",
                 ],
-                actual
+                actual,
             );
         }
-    })
+    });
 
     test("grandparents with wrapped create and delete", async () => {
         const registry = createSelfTestRegistry();
@@ -55,7 +55,7 @@ describe("the resource keyword makes it easy to create resources", () => {
                     "GET examples/grandparents/TN-0",
                     "FINISH grandparents get_grandparent aws :: passed",
                 ],
-                actual
+                actual,
             );
         }
     });
@@ -76,7 +76,7 @@ describe("the resource keyword makes it easy to create resources", () => {
                     "parents delete_parent aws",
                     "parents delete_parent azure",
                 ],
-                actual
+                actual,
             );
         }
         {
@@ -111,23 +111,23 @@ describe("the resource keyword makes it easy to create resources", () => {
                     "DELETE /examples/parents TN-6, azure",
                     "FINISH parents delete_parent azure :: passed",
                 ],
-                actual
+                actual,
             );
 
             const info = getResourceInfo(registry);
 
             chai.assert.deepEqual(
-            `Resource info:
+                `Resource info:
 grandparents:
 {"data":{"id":"TN-0","name":"TN-1","favoriteProvider":"aws"},"dependents":[],"lockedBy":null}
 {"data":{"id":"TN-4","name":"TN-5","favoriteProvider":"azure"},"dependents":[],"lockedBy":null}
 parents:
   deleted: {"data":{"favoriteProvider":"aws","grandparentId":"TN-0","id":"TN-2","name":"TN-3"},"dependents":[],"lockedBy":null}
   deleted: {"data":{"favoriteProvider":"azure","grandparentId":"TN-4","id":"TN-6","name":"TN-7"},"dependents":[],"lockedBy":null}`,
-            info
-        );
+                info,
+            );
         }
-    })
+    });
 
     test("children", async () => {
         // This time we've got three resources / suites.
@@ -154,7 +154,7 @@ parents:
                     "parents delete_parent aws",
                     "parents delete_parent azure",
                 ],
-                actual
+                actual,
             );
         }
         {
@@ -211,13 +211,13 @@ parents:
                     "DELETE /examples/parents TN-6, azure",
                     "FINISH parents delete_parent azure :: passed",
                 ],
-                actual
+                actual,
             );
 
             const info = getResourceInfo(registry);
 
             chai.assert.deepEqual(
-            `Resource info:
+                `Resource info:
 grandparents:
 {"data":{"id":"TN-0","name":"TN-1","favoriteProvider":"aws"},"dependents":[],"lockedBy":null}
 {"data":{"id":"TN-4","name":"TN-5","favoriteProvider":"azure"},"dependents":[],"lockedBy":null}
@@ -227,8 +227,8 @@ parents:
 children:
   deleted: {"data":{"favoriteProvider":"aws","parentId":"TN-2","id":"TN-8","name":"TN-9"},"dependents":[],"lockedBy":null}
   deleted: {"data":{"favoriteProvider":"azure","parentId":"TN-6","id":"TN-10","name":"TN-11"},"dependents":[],"lockedBy":null}`,
-            info
-        );
+                info,
+            );
         }
-    })
-})
+    });
+});

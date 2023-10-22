@@ -26,14 +26,9 @@ import * as dsl from "./sugar/dsl";
 
 export const registry = new TestRegistry();
 
-export const {
-    addCreateTests,
-    addDeleteTests,
-    dependsOn,
-    resource,
-    test,
-} = dsl.createDslFuncs(registry);
+export const { addCreateTests, addDeleteTests, dependsOn, resource, test } =
+    dsl.createDslFuncs(registry);
 
 export const sayHello = () => {
     console.log("well hi!\n");
-}
+};

@@ -17,17 +17,17 @@ type StateModifier<D extends Data> = (data: State<D>) => void;
 export type StateCreator<
     Ctx extends ITestContext,
     D extends Data,
-    CreateOptions
+    CreateOptions,
 > = (ctx: Ctx, args: CreateOptions) => Promise<D>;
 export type StateDeleter<Ctx extends ITestContext, D extends Data> = (
     ctx: Ctx,
-    data: D
+    data: D,
 ) => Promise<void>;
 
 class StateBag<
     Ctx extends ITestContext,
     D extends Data & CreateOptions,
-    CreateOptions
+    CreateOptions,
 > {
     deleted: State<D>[];
     elements: State<D>[];
@@ -60,7 +60,7 @@ class StateBag<
 
     public get(
         search: StateSearcher<D>,
-        modifier: StateModifier<D>
+        modifier: StateModifier<D>,
     ): State<D> | null {
         for (const state of this.elements) {
             if (search(state)) {
@@ -91,7 +91,7 @@ class StateBag<
 export class ResourceManager<
     Ctx extends ITestContext,
     D extends Data & CreateOptions,
-    CreateOptions
+    CreateOptions,
 > {
     bag: StateBag<Ctx, D, CreateOptions>;
     createFunc: StateCreator<Ctx, D, CreateOptions> | null;
@@ -120,7 +120,7 @@ export class ResourceManager<
     public async create(
         ctx: Ctx,
         options: CreateOptions,
-        modifier: StateModifier<D>
+        modifier: StateModifier<D>,
     ): Promise<State<D>> {
         if (this.createFunc == null) {
             throw new Error("createFun calling create");
@@ -129,7 +129,7 @@ export class ResourceManager<
             ctx,
             options,
             modifier,
-            this.createFunc
+            this.createFunc,
         );
     }
 
@@ -137,7 +137,7 @@ export class ResourceManager<
         ctx: Ctx,
         options: CreateOptions,
         modifier: StateModifier<D>,
-        createFunc: StateCreator<Ctx, D, CreateOptions>
+        createFunc: StateCreator<Ctx, D, CreateOptions>,
     ): Promise<State<D>> {
         const data = await createFunc(ctx, options);
         const dataState = {
@@ -164,7 +164,7 @@ export class ResourceManager<
     public async getOrCreateAndDelete(
         ctx: Ctx,
         search: StateSearcher<D>,
-        createArgs: CreateOptions
+        createArgs: CreateOptions,
     ) {
         if (this.deleteFunc == null) {
             throw new Error("deleteFunc not set");
@@ -175,7 +175,7 @@ export class ResourceManager<
             createArgs,
             (state: State<D>) => {
                 state.lockedBy = "delete";
-            }
+            },
         );
         await this.delete(ctx, state.data);
     }
@@ -184,7 +184,7 @@ export class ResourceManager<
         ctx: Ctx,
         search: StateSearcher<D>,
         createArgs: CreateOptions,
-        modifier: StateModifier<D>
+        modifier: StateModifier<D>,
     ): Promise<State<D>> {
         const state = this.bag.get(search, modifier);
         if (state != null) {
@@ -208,7 +208,7 @@ export class ResourceManager<
             createArgs: CreateOptions;
             modifierPre?: StateModifier<D>;
         },
-        ctx: Ctx
+        ctx: Ctx,
     ): Promise<State<D>> {
         if (modifierPre === undefined) {
             modifierPre = (state: State<D>) => {
@@ -218,7 +218,7 @@ export class ResourceManager<
         if (searchData !== undefined) {
             if (searchState !== undefined) {
                 throw new Error(
-                    "both searchData and searchState cannot be defined at once"
+                    "both searchData and searchState cannot be defined at once",
                 );
             }
         }
@@ -233,7 +233,10 @@ export class ResourceManager<
                     }
                     // TODO(tss): make typeScript figure out CreateOptions must be
                     // a subset of `D`
-                    return objectIsSubsetOf(createArgs as any, state.data as any);
+                    return objectIsSubsetOf(
+                        createArgs as any,
+                        state.data as any,
+                    );
                 };
             }
         }
@@ -261,7 +264,7 @@ export class ResourceManager<
             modifierPost?: StateModifier<D>;
         },
         ctx: Ctx,
-        f: (data: State<D>) => R
+        f: (data: State<D>) => R,
     ): Promise<R> {
         if (modifierPost === undefined) {
             modifierPost = (state: State<D>) => {
@@ -275,7 +278,7 @@ export class ResourceManager<
                 createArgs,
                 modifierPre,
             },
-            ctx
+            ctx,
         );
         try {
             const r = await f(data);
@@ -304,7 +307,7 @@ export class ResourceManager<
             modifierPost?: StateModifier<D>;
             releaseLevel?: number;
         },
-        ctx: Ctx
+        ctx: Ctx,
     ): Promise<State<D>> {
         const rl = releaseLevel === undefined ? 0 : releaseLevel;
         const mp =
@@ -320,7 +323,7 @@ export class ResourceManager<
                 createArgs,
                 modifierPre,
             },
-            ctx
+            ctx,
         );
         ctx.defer(rl, () => {
             mp(data);
@@ -338,10 +341,10 @@ export class ResourceManager<
             modifierPost?: StateModifier<D>;
         },
         ctx: Ctx,
-        f: (data: D) => R
+        f: (data: D) => R,
     ): Promise<R> {
         return await this.findStateAndCall(options, ctx, (state) =>
-            f(state.data)
+            f(state.data),
         );
     }
 
@@ -355,7 +358,7 @@ export class ResourceManager<
             modifierPost?: StateModifier<D>;
             releaseLevel?: number;
         },
-        ctx: Ctx
+        ctx: Ctx,
     ): Promise<D> {
         const state = await this.findState(args, ctx);
         return state.data;
@@ -394,7 +397,7 @@ export class ResourceManager<
      */
     public registerWrappedCreateFunc(
         testNameFunc: (arg: CreateOptions) => string,
-        createFunc: StateCreator<Ctx, D, CreateOptions>
+        createFunc: StateCreator<Ctx, D, CreateOptions>,
     ) {
         this.createFunc = wrap(createFunc, { nameFunc: testNameFunc });
     }
@@ -402,7 +405,7 @@ export class ResourceManager<
     /** This is like the register "wrapped" create func above */
     public registerWrappedDeleteFunc(
         testNameFunc: (arg: CreateOptions) => string,
-        deleteFunc: StateDeleter<Ctx, D>
+        deleteFunc: StateDeleter<Ctx, D>,
     ) {
         this.deleteFunc = wrap(deleteFunc, { nameFunc: testNameFunc });
     }
@@ -418,7 +421,7 @@ export class ResourceManager<
                         .slice(0, index)
                         .concat(state.dependents.slice(index + 1));
                 }
-            }
+            },
         );
     }
 
@@ -444,7 +447,7 @@ export class ResourceManagerRegistry<Ctx extends ITestContext> {
     }
 
     public new<D extends Data & CreateOptions, CreateOptions>(
-        name: string
+        name: string,
     ): ResourceManager<Ctx, D, CreateOptions> {
         if (this.lookup[name] !== undefined) {
             throw new Error(`resources for ${name} are already defined!`);
@@ -495,7 +498,7 @@ export class ResourceManagerRegistry<Ctx extends ITestContext> {
             const val = jsonObj[name];
             if (val === undefined) {
                 throw new Error(
-                    `error loading ResourceManagerRegistry: data is missing for "${name}" resources`
+                    `error loading ResourceManagerRegistry: data is missing for "${name}" resources`,
                 );
             }
             rm.load(val);

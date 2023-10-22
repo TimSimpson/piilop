@@ -13,10 +13,10 @@ export interface TestRunnerItem<Ctx extends ITestContext> {
 
 export const createRunnerList = <
     Ctx extends ITestContext,
-    TRI extends TestRunnerItem<Ctx>
+    TRI extends TestRunnerItem<Ctx>,
 >(
     entries: TestEntry<Ctx, any>[],
-    createTestRunnerItem: (entry: TestEntry<Ctx, any>) => TRI
+    createTestRunnerItem: (entry: TestEntry<Ctx, any>) => TRI,
 ): TRI[] => {
     // clear the list of all dependency info
     const initialList: TRI[] = [];
@@ -59,7 +59,7 @@ export const createRunnerList = <
             }
             if (!found) {
                 throw new Error(
-                    `Error: test "${element.entry.name}" has a dependency "${dep}" which was not found.`
+                    `Error: test "${element.entry.name}" has a dependency "${dep}" which was not found.`,
                 );
             }
         }
@@ -85,7 +85,7 @@ export const createRunnerList = <
     while (noDepsList.length > 0) {
         const noDep = noDepsList[0];
         debugLog(
-            `noDepdsList.length = ${noDepsList.length}, looking at ${noDep.entry.name}`
+            `noDepdsList.length = ${noDepsList.length}, looking at ${noDep.entry.name}`,
         );
         noDepsList = noDepsList.slice(1);
         sortedList.push(noDep);
@@ -95,13 +95,13 @@ export const createRunnerList = <
             // it will be run
             const index = entry.dependsOn.findIndex((e) => e === noDep);
             debugLog(
-                `   the depends on length = ${entry.dependsOn.length}, index=${index}`
+                `   the depends on length = ${entry.dependsOn.length}, index=${index}`,
             );
             entry.dependsOn = entry.dependsOn
                 .slice(0, index)
                 .concat(entry.dependsOn.slice(index + 1));
             debugLog(
-                `   the depends on length is now = ${entry.dependsOn.length}`
+                `   the depends on length is now = ${entry.dependsOn.length}`,
             );
             if (entry.dependsOn.length == 0) {
                 debugLog(`pushin'`);
@@ -116,7 +116,7 @@ export const createRunnerList = <
         debugLog(`element.entry.name=${element.entry.name}`);
         if (element.dependsOn.length != 0) {
             throw new Error(
-                `Error sorting tests: a cycle appears to exist between ${element.entry.name} and ${element.dependsOn[0].entry.name}`
+                `Error sorting tests: a cycle appears to exist between ${element.entry.name} and ${element.dependsOn[0].entry.name}`,
             );
         }
     }
@@ -127,7 +127,7 @@ export const createRunnerList = <
 
     if (sortedList.length != initialList.length) {
         throw new Error(
-            `Error sorting tests: the final sorted length (${sortedList.length}) did not equal the original length (${initialList.length})`
+            `Error sorting tests: the final sorted length (${sortedList.length}) did not equal the original length (${initialList.length})`,
         );
     }
     return sortedList;

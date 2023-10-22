@@ -6,7 +6,7 @@ const program = new Command("naft");
 
 program.option(
     "-f, --file <file>",
-    "where to save / load results (typically in ~/.bepsin-tests)"
+    "where to save / load results (typically in ~/.bepsin-tests)",
 );
 
 const getFileArg = (): string | undefined =>

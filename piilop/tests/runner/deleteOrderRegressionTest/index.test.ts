@@ -32,21 +32,18 @@ describe("order / resource fetching should work with delete", () => {
         }
         {
             const actual = await runTests(registry);
-            chai.assert.deepEqual(
-                actual,
-                [
-                    "START create container ubuntu",
-                    "FINISH create container ubuntu :: passed",
-                    "START create container windows",
-                    "FINISH create container windows :: passed",
-                    "START test we can get Ubuntu containers",
-                    "FINISH test we can get Ubuntu containers :: passed",
-                    "START delete container ubuntu",
-                    "FINISH delete container ubuntu :: passed",
-                ]
-            );
+            chai.assert.deepEqual(actual, [
+                "START create container ubuntu",
+                "FINISH create container ubuntu :: passed",
+                "START create container windows",
+                "FINISH create container windows :: passed",
+                "START test we can get Ubuntu containers",
+                "FINISH test we can get Ubuntu containers :: passed",
+                "START delete container ubuntu",
+                "FINISH delete container ubuntu :: passed",
+            ]);
         }
-    })
+    });
 
     test("test container and app example", async () => {
         chai.config.showDiff = true;
@@ -100,11 +97,13 @@ describe("order / resource fetching should work with delete", () => {
                     "START delete container ubuntu",
                     "FINISH delete container ubuntu :: passed",
                 ],
-                actual
+                actual,
             );
         }
 
-        const remainingOs = Object.values(service.getContainers()).map(c => c.operatingSystem).join(" ");
+        const remainingOs = Object.values(service.getContainers())
+            .map((c) => c.operatingSystem)
+            .join(" ");
 
         // test that Ubuntu is the only container deleted.
         // There was a bug due to not creating the function to look for
@@ -114,5 +113,5 @@ describe("order / resource fetching should work with delete", () => {
         chai.assert.include(remainingOs, "macos");
         chai.assert.include(remainingOs, "freedos");
         chai.assert.notInclude(remainingOs, "ubuntu");
-    })
-})
+    });
+});

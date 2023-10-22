@@ -3,7 +3,6 @@ import * as chai from "chai";
 import type { ITestContext, TestContextPushArgs } from "../../naf/core/base";
 import { isWrapped, wrap } from "../../naf/core/base";
 
-
 class TestContextImpl {
     _currentTestName: string;
     defered: Function[];
@@ -36,7 +35,7 @@ class TestContextImpl {
             target = target.parent;
             if (target == null) {
                 throw new Error(
-                    "cannot execute defer; no parent is at that level"
+                    "cannot execute defer; no parent is at that level",
                 );
             }
             --caller;
@@ -79,7 +78,7 @@ const wrappedS2 = wrap(
         log.push(`bye!! Current test = ${ctx.currentTestName()}`);
         return result;
     },
-    { name: "wrappedS2" }
+    { name: "wrappedS2" },
 );
 
 const createResource = wrap(
@@ -91,7 +90,7 @@ const createResource = wrap(
     },
     {
         nameFunc: (provider) => `create resources ${provider}`,
-    }
+    },
 );
 
 const useResource = wrap(
@@ -101,57 +100,59 @@ const useResource = wrap(
         log.push(`using resource ${resource}`);
         log.push(`bye!! Current test = ${ctx.currentTestName()}`);
     },
-    { nameFunc: (provider: string) => `useResource ${provider}` }
+    { nameFunc: (provider: string) => `useResource ${provider}` },
 );
 
+describe("testing index file", () => {
+    test("empty string should result in zero", async () => {
+        const ctx = new TestContextImpl();
 
-describe('testing index file', () => {
-  test('empty string should result in zero', async () => {
-    const ctx = new TestContextImpl();
+        const actual = await wrappedS(ctx, "hi");
+        chai.assert.deepEqual("hi", actual);
 
-    const actual = await wrappedS(ctx, "hi");
-    chai.assert.deepEqual("hi", actual);
+        chai.assert.deepEqual(
+            ["called s with hi", "Current test name = s"],
+            log,
+        );
 
-    chai.assert.deepEqual(["called s with hi", "Current test name = s"], log);
+        await ctx.cleanUp();
 
-    await ctx.cleanUp();
+        chai.assert.deepEqual(
+            ["called s with hi", "Current test name = s", "cleanup time!"],
+            log,
+        );
 
-    chai.assert.deepEqual(
-        ["called s with hi", "Current test name = s", "cleanup time!"],
-        log
-    );
+        chai.assert.deepEqual(false, isWrapped(s));
+        chai.assert.deepEqual(true, isWrapped(wrappedS));
+        chai.assert.deepEqual(false, isWrapped(w));
+        chai.assert.deepEqual(true, isWrapped(wrappedW));
 
-    chai.assert.deepEqual(false, isWrapped(s));
-    chai.assert.deepEqual(true, isWrapped(wrappedS));
-    chai.assert.deepEqual(false, isWrapped(w));
-    chai.assert.deepEqual(true, isWrapped(wrappedW));
+        log = [];
+        const result = await wrappedS2(ctx, 42);
+        chai.assert.deepEqual("42", result);
+        chai.assert.deepEqual(
+            [
+                "hi! Current test = wrappedS2",
+                "called s with 42",
+                "Current test name = s",
+                "bye!! Current test = wrappedS2",
+                "cleanup time!",
+            ],
+            log,
+        );
 
-    log = [];
-    const result = await wrappedS2(ctx, 42);
-    chai.assert.deepEqual("42", result);
-    chai.assert.deepEqual(
-        [
-            "hi! Current test = wrappedS2",
-            "called s with 42",
-            "Current test name = s",
-            "bye!! Current test = wrappedS2",
-            "cleanup time!",
-        ],
-        log
-    );
-
-    log = [];
-    await useResource(ctx, "AWS");
-    chai.assert.deepEqual(
-        [
-            "hi! Current test = useResource AWS",
-            "createResource! Current test = create resources AWS",
-            "creating a resource with provider AWS",
-            "using resource resource AWS",
-            "bye!! Current test = useResource AWS",
-            "cleaning up resouce for AWS",
-        ],
-        log
-    );
-  });
+        log = [];
+        await useResource(ctx, "AWS");
+        chai.assert.deepEqual(
+            [
+                "hi! Current test = useResource AWS",
+                "createResource! Current test = create resources AWS",
+                "creating a resource with provider AWS",
+                "using resource resource AWS",
+                "bye!! Current test = useResource AWS",
+                "cleaning up resouce for AWS",
+            ],
+            log,
+        );
+    });
 });

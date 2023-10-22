@@ -23,7 +23,7 @@ export const networks = resource<NetworkData, NewNetworkArgs>(
         r.create(
             async (
                 _ctx: TestContext,
-                args: NewNetworkArgs
+                args: NewNetworkArgs,
             ): Promise<NetworkData> => {
                 console.log("creating network \n");
                 const network = {
@@ -32,19 +32,19 @@ export const networks = resource<NetworkData, NewNetworkArgs>(
                     provider: args.provider,
                 };
                 return network;
-            }
+            },
         );
 
         r.addCreateTests(
             (args) => `create_network ${args.provider}`,
-            ...providers
+            ...providers,
         );
         r.delete(async (_ctx, data) => {
             console.log(`deleting network ${data.id}\n`);
         });
         r.addDeleteTests(
             (args) => `delete_network ${args.provider}`,
-            ...providers
+            ...providers,
         );
 
         test("get_network", async (ctx) => {
@@ -56,7 +56,7 @@ export const networks = resource<NetworkData, NewNetworkArgs>(
                 { provider: "aws" },
                 (network) => {
                     network.lockedBy = "infra get network";
-                }
+                },
             );
             if (network == null) {
                 abort();
@@ -67,5 +67,5 @@ export const networks = resource<NetworkData, NewNetworkArgs>(
             // assert(network.data.id == "12345");
             network.lockedBy = null;
         });
-    }
+    },
 );

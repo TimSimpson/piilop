@@ -61,7 +61,7 @@ export class TestRegistry<Ctx extends ITestContext> {
     }
 
     public newResourceRegistry<D extends Data & C, C>(
-        resourceName: string
+        resourceName: string,
     ): ResourceManager<Ctx, D, C> {
         return this.resources.new<D, C>(resourceName);
     }
@@ -87,7 +87,7 @@ export class TestRegistry<Ctx extends ITestContext> {
             const originalFunc = args.create.func;
             rm.registerWrappedCreateFunc(
                 args.create.testName,
-                args.create.func
+                args.create.func,
             );
             for (const testCaseArgs of args.create.testCases) {
                 const func = async (ctx: Ctx) => {
@@ -95,7 +95,7 @@ export class TestRegistry<Ctx extends ITestContext> {
                         ctx,
                         testCaseArgs,
                         (_) => {},
-                        originalFunc
+                        originalFunc,
                     );
                 };
                 const entry: TestEntry<Ctx, any> = {
@@ -120,10 +120,13 @@ export class TestRegistry<Ctx extends ITestContext> {
                                 state.dependents.length == 0 &&
                                 state.lockedBy == null &&
                                 state.data &&
-                                objectIsSubsetOf(testCaseArgs as any, state.data as any),
+                                objectIsSubsetOf(
+                                    testCaseArgs as any,
+                                    state.data as any,
+                                ),
                         },
                         ctx,
-                        async (data) => await rm.delete(ctx, data)
+                        async (data) => await rm.delete(ctx, data),
                     );
                 };
                 const entry: TestEntry<Ctx, any> = {
@@ -216,7 +219,7 @@ export class TestRegistry<Ctx extends ITestContext> {
                             objectIsSubsetOf(opt as any, state.data as any),
                     },
                     ctx,
-                    async (data) => await resourceManager.delete(ctx, data)
+                    async (data) => await resourceManager.delete(ctx, data),
                 );
             };
             this.register({

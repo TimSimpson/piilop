@@ -18,13 +18,13 @@ const backups = resource<BackupData, NewBackupArgs>("backups", (r) => {
     r.create(async (ctx, args) => {
         const cluster = await clusters.findState(
             { createArgs: { provider: args.provider } },
-            ctx
+            ctx,
         );
         console.log("creating Cluster \n");
         const backup = {
             id: randomName(),
             name: randomName(),
-        networkId: cluster.data.id,
+            networkId: cluster.data.id,
             provider: "aws",
             sourceClusterId: cluster.data.id,
         };
@@ -39,18 +39,18 @@ const backups = resource<BackupData, NewBackupArgs>("backups", (r) => {
 
     r.addCreateTests(
         (args) => `mesdb create_backup ${args.provider}`,
-        ...providers
+        ...providers,
     );
 
     r.addDeleteTests(
         (args) => `mesdb delete_backup ${args.provider}`,
-        ...providers
+        ...providers,
     );
 
     test("mesdb get_backup aws", async (ctx) => {
         const backup = await backups.findData(
             { createArgs: { provider: "aws" } },
-            ctx
+            ctx,
         );
         console.log(`I am getting a backup ${backup}\n`);
     });

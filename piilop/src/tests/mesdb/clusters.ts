@@ -22,7 +22,7 @@ export const clusters = resource<ClusterData, NewClusterArgs>(
         r.create(async (ctx, args) => {
             const network = await networks.findState(
                 { createArgs: { provider: args.provider } },
-                ctx
+                ctx,
             );
             console.log("creating Cluster \n");
             const cluster = {
@@ -41,20 +41,20 @@ export const clusters = resource<ClusterData, NewClusterArgs>(
 
         r.addCreateTests(
             (args) => `mesdb create_cluster ${args.provider}`,
-            ...providers
+            ...providers,
         );
 
         r.addDeleteTests(
             (args) => `mesdb delete_cluster ${args.provider}`,
-            ...providers
+            ...providers,
         );
 
         test("mesdb get_cluster aws", async (ctx) => {
             const cluster = await clusters.findData(
                 { createArgs: { provider: "aws" } },
-                ctx
+                ctx,
             );
             console.log(`I am getting a cluster ${cluster}\n`);
         });
-    }
+    },
 );
