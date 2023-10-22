@@ -1,4 +1,5 @@
 import { ITestContext, wrap } from "./base";
+import { objectIsSubsetOf } from "./objectEquality";
 
 export type Data = {
     id: string;
@@ -234,17 +235,7 @@ export class ResourceManager<
                     }
                     // TODO(tss): make typeScript figure out CreateOptions must be
                     // a subset of `D`
-                    for (const [key, value] of Object.entries(
-                        createArgs as any
-                    )) {
-                        console.log(`MARIO: deep in findStateManual : (state.data as any)[key] (${(state.data as any)[key]}) !== value (${value})?`)
-                        if ((state.data as any)[key] !== value) {
-                            console.log(`MARIO: deep in findStateManual -> false`);
-                            return false;
-                        }
-                    }
-                    console.log(`MARIO: deep in findStateManual -> true`);
-                    return true;
+                    return objectIsSubsetOf(createArgs as any, state.data as any);
                 };
             }
         }

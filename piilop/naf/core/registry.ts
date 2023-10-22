@@ -1,4 +1,5 @@
 import { ITestContext, TestContextFunc, wrap } from "./base";
+import { objectIsSubsetOf } from "./objectEquality";
 import {
     Data,
     ResourceManager,
@@ -117,7 +118,9 @@ export class TestRegistry<Ctx extends ITestContext> {
                             createArgs: testCaseArgs,
                             searchState: (state) =>
                                 state.dependents.length == 0 &&
-                                state.lockedBy == null,
+                                state.lockedBy == null &&
+                                state.data &&
+                                objectIsSubsetOf(testCaseArgs as any, state.data as any),
                         },
                         ctx,
                         async (data) => await rm.delete(ctx, data)
@@ -208,7 +211,9 @@ export class TestRegistry<Ctx extends ITestContext> {
                         createArgs: opt,
                         searchState: (state) =>
                             state.dependents.length == 0 &&
-                            state.lockedBy == null,
+                            state.lockedBy == null &&
+                            state.data &&
+                            objectIsSubsetOf(opt as any, state.data as any),
                     },
                     ctx,
                     async (data) => await resourceManager.delete(ctx, data)
