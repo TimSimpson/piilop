@@ -1,4 +1,4 @@
-import { TestMain, TestRegistry, DefaultTestObserver, TestObserver } from "../../naf/runner";
+import { BreadCrumbs, TestMain, TestRegistry, TestObserver, TestStackInfo, TestStatus } from "../../naf/runner";
 
 export const createSelfTestRegistry = (): TestRegistry => {
     // For the tests, we create a custom registry. Typically a global
@@ -8,6 +8,51 @@ export const createSelfTestRegistry = (): TestRegistry => {
 
     return registry;
 };
+
+
+class SelfTestObserver {
+    depth: number;
+    log: (message?: any, ...optionalParams: any[])=> void;
+
+    constructor(log?: (message?: any, ...optionalParams: any[])=> void) {
+        this.depth = 0;
+        this.log = log || console.log;
+    }
+
+    breadCrumbsToString(bc?: BreadCrumbs): string {
+        if (!bc) {
+            return "< no breadcrumbs found >";
+        }
+        let result = "";
+        for (const c of bc) {
+            if (result.length == 0) {
+                result = c;
+            } else {
+                result = `${result} -> ${c}`;
+            }
+        }
+        return result;
+    }
+
+    public onTestStarted(name: string, _stackInfo: TestStackInfo) {
+        this.depth ++;
+        this.log(`START ${name}`);
+    }
+
+    public onTestFinished(name: string, status: TestStatus, stackInfo: TestStackInfo, err?: unknown) {
+        this.log(`FINISH ${name} :: ${status}`);
+        if (status === 'failed') {
+            this.log(
+                `TEST FAILED!\n\ttest: ${this.breadCrumbsToString(stackInfo.breadCrumbs())}\n\terror:${err}`,
+            );
+        } else if (status === "skipped") {
+            this.log(
+                `TEST SKIPPED:\n\ttest: ${this.breadCrumbsToString(stackInfo.breadCrumbs())}`,
+            );
+        }
+        this.depth --;
+    }
+}
 
 export class   SelfTestMonitor  {
     incrementingNameIndex: number;
@@ -27,8 +72,7 @@ export class   SelfTestMonitor  {
         const self = this;
         const pushLogs = (message?: any) => { self.log(message); }
         const factory = () : TestObserver => {
-            const observer = new DefaultTestObserver(pushLogs);
-            observer.createPrefix = () => "";
+            const observer = new SelfTestObserver(pushLogs);
             return observer;
         }
         return factory;

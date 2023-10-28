@@ -25,7 +25,7 @@ type TestStackItem =
 // yes, I know these aren't really threads
 let threadCount = 0;
 
-type TestStackInfo = {
+export type TestStackInfo = {
     breadCrumbs: () => BreadCrumbs,
     currentDepth: () => number,
     currentTestName: () => string | null,
