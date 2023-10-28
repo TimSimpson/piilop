@@ -4,6 +4,7 @@ import {
     createSelfTestRegistry,
     runTests,
     createTestList,
+    SelfTestMonitor,
 } from "../../runner/utils";
 
 import { FakeSaasServiceState } from "./client";
@@ -15,6 +16,7 @@ describe("order / resource fetching should work with delete", () => {
         chai.config.showDiff = true;
         chai.config.truncateThreshold = 0;
 
+        const monitor = new SelfTestMonitor();
         const registry = createSelfTestRegistry();
 
         const service = new FakeSaasServiceState();
@@ -31,7 +33,7 @@ describe("order / resource fetching should work with delete", () => {
             ]);
         }
         {
-            const actual = await runTests(registry);
+            const actual = await runTests(monitor, registry);
             chai.assert.deepEqual(actual, [
                 "START create container ubuntu",
                 "FINISH create container ubuntu :: passed",
@@ -49,6 +51,8 @@ describe("order / resource fetching should work with delete", () => {
         chai.config.showDiff = true;
         chai.config.truncateThreshold = 0;
 
+        const monitor = new SelfTestMonitor();
+
         const registry = createSelfTestRegistry();
 
         const service = new FakeSaasServiceState();
@@ -57,7 +61,7 @@ describe("order / resource fetching should work with delete", () => {
         createApps(service, registry, containers);
 
         {
-            const actual = await runTests(registry);
+            const actual = await runTests(monitor, registry);
             chai.assert.deepEqual(
                 [
                     "START create container ubuntu",

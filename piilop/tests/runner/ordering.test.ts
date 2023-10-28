@@ -5,6 +5,7 @@ import {
     runTests,
     createTestList,
     getResourceInfo,
+    SelfTestMonitor,
 } from "./utils";
 import {
     createChildren,
@@ -18,15 +19,17 @@ describe("when running tests", () => {
         chai.config.showDiff = true;
         chai.config.truncateThreshold = 0;
 
+        const monitor = new SelfTestMonitor();
+
         const registry = createSelfTestRegistry();
-        createGrandParents(registry);
+        createGrandParents(monitor, registry);
 
         {
             const actual = createTestList(registry);
             chai.assert.deepEqual(["examples get_grandparent aws"], actual);
         }
         {
-            const actual = await runTests(registry);
+            const actual = await runTests(monitor, registry);
             chai.assert.deepEqual(
                 [
                     "START examples get_grandparent aws",
@@ -46,8 +49,11 @@ describe("when running tests", () => {
         chai.config.truncateThreshold = 0;
 
         // This time we've got two resources / suites
+        const monitor = new SelfTestMonitor();
+
         const registry = createSelfTestRegistry();
-        createParents(registry);
+
+        createParents(monitor, registry);
 
         {
             const actual = createTestList(registry);
@@ -64,7 +70,7 @@ describe("when running tests", () => {
             );
         }
         {
-            const actual = await runTests(registry);
+            const actual = await runTests(monitor, registry);
             chai.assert.deepEqual(actual, [
                 "START examples get_grandparent aws",
                 "START examples create_grandparents aws",
@@ -113,11 +119,13 @@ parents:
         chai.config.showDiff = true;
         chai.config.truncateThreshold = 0;
 
+        const monitor = new SelfTestMonitor();
+
         // This time we've got three resources / suites.
         // The dependency chain between grandparents -> parents -> children reflects
         // networks -> clusters -> backups.
         const registry = createSelfTestRegistry();
-        createChildren(registry);
+        createChildren(monitor, registry);
 
         {
             const actual = createTestList(registry);
@@ -139,7 +147,7 @@ parents:
             );
         }
         {
-            const actual = await runTests(registry);
+            const actual = await runTests(monitor, registry);
             // Note that the tests create a grandparent, then a parent, then go back
             // and create a grandparent again. That's because there's no explicit
             // test to create a grand parent whose favorite cloud provider is

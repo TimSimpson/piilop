@@ -5,6 +5,8 @@ describe("the suite keyword makes it easy to create simple tests and ordering", 
     test("simple", async () => {
         console.log("hi");
 
+        const monitor = new runnerUtils.SelfTestMonitor();
+
         const registry = runnerUtils.createSelfTestRegistry();
 
         const { dependsOn, suite, test } = dsl.createDslFuncs(registry);
@@ -15,16 +17,16 @@ describe("the suite keyword makes it easy to create simple tests and ordering", 
 
         suite("misc", () => {
             dependsOn("projects");
-            test("create_note", async (ctx) => {
-                ctx.log("Greetings from note land!");
+            test("create_note", async (_ctx) => {
+                monitor.log("Greetings from note land!");
             });
 
-            test("create another note", async (ctx) => {
-                ctx.log("Another note created!");
+            test("create another note", async (_ctx) => {
+                monitor.log("Another note created!");
             });
         });
 
-        runnerUtils.runTests(registry, "all");
+        runnerUtils.runTests(monitor, registry, "all");
 
         // const registry = new runner.TestRegistry();
 

@@ -25,6 +25,12 @@ type TestStackItem =
 // yes, I know these aren't really threads
 let threadCount = 0;
 
+type TestStackInfo = {
+    breadCrumbs: () => BreadCrumbs,
+    currentDepth: () => number,
+    currentTestName: () => string | null,
+};
+
 class TestStack {
     depth: number;
     items: TestStackItem[];
@@ -39,7 +45,7 @@ class TestStack {
         threadCount += 1;
     }
 
-    public breadCrumbs(): string {
+    public breadCrumbs(): BreadCrumbs {
         const bc = [];
         for (const item of this.items) {
             if (item.type == "started") {
@@ -50,15 +56,7 @@ class TestStack {
                 }
             }
         }
-        let result = "";
-        for (const c of bc) {
-            if (result.length == 0) {
-                result = c;
-            } else {
-                result = `${result} -> ${c}`;
-            }
-        }
-        return result;
+        return bc;
     }
 
     public currentDepth(): number {
@@ -92,19 +90,10 @@ class TestStack {
 }
 
 export class TestContextOpts {
-    onTestFinished: (n: string, t: TestStatus) => void;
-    onTestStarted: (n: string) => void;
     logs: string[];
-    thread: TestStack;
 
-    constructor(
-        onTestStarted: (n: string) => void,
-        onTestFinished: (n: string, t: TestStatus) => void,
-    ) {
-        this.thread = new TestStack();
+    constructor(        ) {
         this.logs = [];
-        this.onTestFinished = onTestFinished;
-        this.onTestStarted = onTestStarted;
     }
 
     public createArbitraryName(): string {
@@ -114,11 +103,15 @@ export class TestContextOpts {
 
 export class TestContext {
     defered: Function[];
+    observer: TestObserver;
     opts: TestContextOpts;
+    thread: TestStack;
 
-    constructor(opts: TestContextOpts) {
+    constructor(thread: TestStack, opts: TestContextOpts, observer: TestObserver) {
+        this.observer = observer;
         this.opts = opts;
         this.defered = [];
+        this.thread = thread;
     }
 
     public currentTestName(): string | null {
@@ -154,35 +147,35 @@ export class TestContext {
     }
 
     // Logs some stuff. This is mainly used by NAF when it tests itself.
-    public log(msg: string) {
-        this.opts.logs.push(msg);
-    }
+    // public log(msg: string) {
+    //     this.opts.logs.push(msg);
+    // }
 
     public async run<R>(
         testName: string,
         testFunc: core.TestContextFunc<TestContext, R, any>,
     ): Promise<R> {
-        this.opts.thread.startTest(testName);
-        this.opts.onTestStarted(testName);
-        const stackDepth = this.opts.thread.currentDepth();
+        this.thread.startTest(testName);
+        this.observer.onTestStarted(testName, this.thread);
+        const stackDepth = this.thread.currentDepth();
         try {
             const result = await testFunc(this);
-            this.opts.thread.finishTest(testName, "passed");
-            this.opts.onTestFinished(testName, "passed");
+            this.thread.finishTest(testName, "passed");
+            this.observer.onTestFinished(testName, "passed", this.thread);
             return result;
         } catch (err) {
-            if (stackDepth == this.opts.thread.currentDepth()) {
-                this.log(
-                    `TEST FAILED!\n\ttest: ${this.opts.thread.breadCrumbs()}\n\terror:${err}`,
-                );
-                this.opts.thread.finishTest(testName, "failed");
-                this.opts.onTestFinished(testName, "failed");
+            if (stackDepth == this.thread.currentDepth()) {
+                // this.log(
+                //     `TEST FAILED!\n\ttest: ${this.thread.breadCrumbs()}\n\terror:${err}`,
+                // );
+                this.thread.finishTest(testName, "failed");
+                this.observer.onTestFinished(testName, "failed", this.thread, err);
             } else {
-                this.log(
-                    `TEST SKIPPED:\n\ttest: ${this.opts.thread.breadCrumbs()}`,
-                );
-                this.opts.thread.finishTest(testName, "skipped");
-                this.opts.onTestFinished(testName, "skipped");
+                // this.log(
+                //     `TEST SKIPPED:\n\ttest: ${this.thread.breadCrumbs()}`,
+                // );
+                this.thread.finishTest(testName, "skipped");
+                this.observer.onTestFinished(testName, "skipped", this.thread);
             }
             throw err;
         }
@@ -194,14 +187,14 @@ export class TestContextFrame extends TestContext {
     testName: string;
 
     constructor(parent: TestContext, testName: string) {
-        super(parent.opts);
+        super(parent.thread, parent.opts, parent.observer);
         this.parent = parent;
         this.testName = testName;
 
         // only announce tests if the functions aren't aliases of each other
         if (this.parent.currentTestName() != testName) {
-            this.opts.thread.startTest(testName);
-            this.opts.onTestStarted(testName);
+            this.thread.startTest(testName);
+            this.observer.onTestStarted(testName, this.thread);
         }
     }
 
@@ -223,8 +216,8 @@ export class TestContextFrame extends TestContext {
 
     public end(): TestContext {
         if (this.parent.currentTestName() != this.testName) {
-            this.opts.thread.finishTest(this.testName, "passed");
-            this.opts.onTestFinished(this.testName, "passed");
+            this.thread.finishTest(this.testName, "passed");
+            this.observer.onTestFinished(this.testName, "passed", this.thread);
         }
         this.cleanUp();
         return this.parent;
@@ -247,24 +240,85 @@ const createTestRunnerItem = (entry: TestEntry) => {
     };
 };
 
+export type BreadCrumbs = string[];
+
+export type TestObserver = {
+    onTestFinished: (name: string, status: TestStatus, stackInfo: TestStackInfo, err?: unknown) => void;
+    onTestStarted: (name: string, stackInfo: TestStackInfo) => void;
+};
+
+
+export class DefaultTestObserver {
+    depth: number;
+    log: (message?: any, ...optionalParams: any[])=> void;
+
+    constructor(log?: (message?: any, ...optionalParams: any[])=> void) {
+        this.depth = 0;
+        this.log = log || console.log;
+    }
+
+    breadCrumbsToString(bc?: BreadCrumbs): string {
+        if (!bc) {
+            return "< no breadcrumbs found >";
+        }
+        let result = "";
+        for (const c of bc) {
+            if (result.length == 0) {
+                result = c;
+            } else {
+                result = `${result} -> ${c}`;
+            }
+        }
+        return result;
+    }
+
+    createPrefix(): string {
+        return "  • ".repeat(this.depth);
+    }
+
+    public onTestStarted(name: string, _stackInfo: TestStackInfo) {
+        this.depth ++;
+        const prefix = this.createPrefix();
+        this.log(`${prefix}START ${name}`);
+    }
+
+    public onTestFinished(name: string, status: TestStatus, stackInfo: TestStackInfo, err?: unknown) {
+        const prefix = this.createPrefix();
+        this.log(`${prefix}FINISH ${name} :: ${status}`);
+        if (status === 'failed') {
+            this.log(
+                `TEST FAILED!\n\ttest: ${this.breadCrumbsToString(stackInfo.breadCrumbs())}\n\terror:${err}`,
+            );
+        } else if (status === "skipped") {
+            this.log(
+                `TEST SKIPPED:\n\ttest: ${this.breadCrumbsToString(stackInfo.breadCrumbs())}`,
+            );
+        }
+        this.depth --;
+    }
+}
+
 export class TestMain {
-    ctx: TestContext;
     list: TestRunnerItem[];
     registry: TestRegistry;
     depth: number;
+    observerFactory: () => TestObserver;
 
-    constructor(registry: TestRegistry) {
+    constructor(registry: TestRegistry, observerFactory?: () => TestObserver) {
         this.registry = registry;
         this.list = core.createRunnerList<TestContext, TestRunnerItem>(
             registry.getEntries(),
             createTestRunnerItem,
         );
-        const opts = new TestContextOpts(
-            (name) => this.startTest(name),
-            (n, s) => this.finishTest(n, s),
-        );
-        this.ctx = new TestContext(opts);
         this.depth = 1;
+        this.observerFactory = observerFactory || (() => new DefaultTestObserver());
+    }
+
+    newContext(): TestContext {
+        const opts = new TestContextOpts();
+        const thread = new TestStack();
+        const observer = this.observerFactory();
+        return new TestContext(thread, opts, observer);
     }
 
     startTest(name: String) {
@@ -291,7 +345,7 @@ export class TestMain {
             createTestRunnerItem,
         );
 
-        const parallel = true;
+        const parallel = false;
 
         if (parallel) {
             let workLeft: core.TestRunnerItem<TestContext>[] = [];
@@ -307,11 +361,12 @@ export class TestMain {
             const workers: Promise<void>[] = [];
             workerCount = workerCount || 1;
             for (let i = 0; i < workerCount; i++) {
+                const workerCtx = this.newContext();
                 const workerLogic = async () => {
                     await (async () => {})();
                     while (workLeft.length > 0) {
                         const nextEntry = workLeft.pop();
-                        await nextEntry?.entry.func(this.ctx);
+                        await nextEntry?.entry.func(workerCtx);
                     }
                 };
 
@@ -320,14 +375,13 @@ export class TestMain {
 
             await Promise.all(workers);
         } else {
+            const workerCtx = this.newContext();
             for (const entry of list) {
                 if (entry.entry.name.startsWith(name)) {
-                    await entry.entry.func(this.ctx);
+                    await entry.entry.func(workerCtx);
                 }
             }
         }
-
-        console.log("Done");
     }
 
     public showTestList(shower?: (msg: string) => void) {

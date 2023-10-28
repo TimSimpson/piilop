@@ -1,4 +1,4 @@
-import { TestMain, TestRegistry } from "../../naf/runner";
+import { TestMain, TestRegistry, DefaultTestObserver, TestObserver } from "../../naf/runner";
 
 export const createSelfTestRegistry = (): TestRegistry => {
     // For the tests, we create a custom registry. Typically a global
@@ -9,50 +9,60 @@ export const createSelfTestRegistry = (): TestRegistry => {
     return registry;
 };
 
-export const createSelfTestMain = (registry: TestRegistry): TestMain => {
-    const main = new TestMain(registry);
+export class   SelfTestMonitor  {
+    incrementingNameIndex: number;
+    logs: string[]
 
-    // let depth = 0;
 
-    main.startTest = (name) => {
-        main.ctx.log(`START ${name}`);
-        // ++depth;
-    };
-    main.finishTest = (name, status) => {
-        main.ctx.log(`FINISH ${name} :: ${status}`);
-        // --depth;
-    };
+    constructor() {
+        this.incrementingNameIndex = 0;
+        this.logs = [];
+    }
 
-    // const orginalLog = main.ctx.log;
-    // main.ctx.log = (msg: string) => {
-    //     orginalLog(`${'- '.repeat(depth)}${msg}`);
-    // }
+    createArbitraryName(): string {
+        return `TN-${this.incrementingNameIndex++}`;
+    }
 
-    let incrementingNameIndex = 0;
+    observerFactory(): () => TestObserver {
+        const self = this;
+        const pushLogs = (message?: any) => { self.log(message); }
+        const factory = () : TestObserver => {
+            const observer = new DefaultTestObserver(pushLogs);
+            observer.createPrefix = () => "";
+            return observer;
+        }
+        return factory;
+    }
 
-    const createIncrementingName = (): string => {
-        // TN == Test Number
-        return `TN-${incrementingNameIndex++}`;
-    };
+    getLogs(): string[] {
+        return this.logs;
+    }
 
-    main.ctx.opts.createArbitraryName = createIncrementingName;
+    log(message?: any) {
+        this.logs.push(message);
+    }
 
-    return main;
-};
+    logWriter(): (message?: any) => void {
+        const self = this;
+        return (message?: any) => { self.log(message); };
+    }
+}
 
 // creates a new "main", runs the tests, and returns the ctx logs
 export const runTests = async (
+    monitor: SelfTestMonitor,
     registry: TestRegistry,
     test?: string,
 ): Promise<string[]> => {
-    const main = createSelfTestMain(registry);
+    const main = new TestMain(registry, monitor.observerFactory());
     await main.runTest(test);
-    return main.ctx.getLogs();
+    return monitor.getLogs();
 };
 
 export const createTestList = (registry: TestRegistry): string[] => {
     const list: string[] = [];
-    const main = createSelfTestMain(registry);
+    const monitor = new SelfTestMonitor();
+    const main = new TestMain(registry, monitor.observerFactory());
     main.showTestList((s) => list.push(s));
     return list;
 };

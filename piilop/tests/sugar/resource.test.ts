@@ -5,6 +5,7 @@ import {
     runTests,
     createTestList,
     getResourceInfo,
+    SelfTestMonitor
 } from "../runner/utils";
 import {
     createChildren,
@@ -15,15 +16,17 @@ import {
 
 describe("the resource keyword makes it easy to create resources", () => {
     test("grandparents", async () => {
+        const monitor = new SelfTestMonitor();
+
         const registry = createSelfTestRegistry();
-        createGrandParents(registry);
+        createGrandParents(monitor, registry);
 
         {
             const actual = createTestList(registry);
             chai.assert.deepEqual(["grandparents get_grandparent aws"], actual);
         }
         {
-            const actual = await runTests(registry);
+            const actual = await runTests(monitor, registry);
             chai.assert.deepEqual(
                 [
                     "START grandparents get_grandparent aws",
@@ -37,15 +40,16 @@ describe("the resource keyword makes it easy to create resources", () => {
     });
 
     test("grandparents with wrapped create and delete", async () => {
+        const monitor = new SelfTestMonitor();
         const registry = createSelfTestRegistry();
-        createGrandParentsUsingWrappedCreateAndDeletes(registry);
+        createGrandParentsUsingWrappedCreateAndDeletes(monitor, registry);
 
         {
             const actual = createTestList(registry);
             chai.assert.deepEqual(["grandparents get_grandparent aws"], actual);
         }
         {
-            const actual = await runTests(registry);
+            const actual = await runTests(monitor, registry);
             chai.assert.deepEqual(
                 [
                     "START grandparents get_grandparent aws",
@@ -62,8 +66,9 @@ describe("the resource keyword makes it easy to create resources", () => {
 
     test("parents", async () => {
         // This time we've got two resources / suites
+        const monitor = new SelfTestMonitor();
         const registry = createSelfTestRegistry();
-        createParents(registry);
+        createParents(monitor, registry);
 
         {
             const actual = createTestList(registry);
@@ -80,7 +85,7 @@ describe("the resource keyword makes it easy to create resources", () => {
             );
         }
         {
-            const actual = await runTests(registry);
+            const actual = await runTests(monitor, registry);
             // TODO(tss): this has repeating entries because of my original, foolish,
             // decision to wrap each create function as if it was a test itself.
             // I know think wrapping it so the context knows about it is necessary,
@@ -133,8 +138,9 @@ parents:
         // This time we've got three resources / suites.
         // The dependency chain between grandparents -> parents -> children reflects
         // networks -> clusters -> backups.
+        const monitor = new SelfTestMonitor();
         const registry = createSelfTestRegistry();
-        createChildren(registry);
+        createChildren(monitor, registry);
 
         {
             const actual = createTestList(registry);
@@ -158,7 +164,7 @@ parents:
             );
         }
         {
-            const actual = await runTests(registry);
+            const actual = await runTests(monitor, registry);
             // Note that the tests create a grandparent, then a parent, then go back
             // and create a grandparent again. That's because there's no explicit
             // test to create a grand parent whose favorite cloud provider is

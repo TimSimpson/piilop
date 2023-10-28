@@ -5,6 +5,7 @@ import {
     TestRegistry,
 } from "../../naf/runner";
 import * as chai from "chai";
+import { SelfTestMonitor } from "./utils";
 
 // In NAF, resources need the following:
 
@@ -28,7 +29,7 @@ type Grandparents = ResourceManager<GrandparentData, NewGrandparentArgs>;
 
 export const asyncAction = async () => {};
 
-export const createGrandParents = (registry: TestRegistry): Grandparents => {
+export const createGrandParents = (monitor: SelfTestMonitor, registry: TestRegistry): Grandparents => {
     // Here we create a resource manager. Typically it's a global variable so the various tests
     // can grab it.
     const grandparents = registry.newResourceRegistry<
@@ -42,16 +43,16 @@ export const createGrandParents = (registry: TestRegistry): Grandparents => {
         // Note that "interests" forms part of the test name
         (args) => `examples create_grandparents ${args.favoriteProvider}`,
         async (
-            ctx: TestContext,
+            _ctx: TestContext,
             args: NewGrandparentArgs,
         ): Promise<GrandparentData> => {
             // Inside this code, we are running a test called `example create_grandparents`.
             // This "test" may run multiple times.
-            ctx.log(`POST examples/grandparents`);
+            monitor.log(`POST examples/grandparents`);
             await asyncAction();
             const grandparent = {
-                id: ctx.createArbitraryName(),
-                name: ctx.createArbitraryName(),
+                id: monitor.createArbitraryName(),
+                name: monitor.createArbitraryName(),
                 favoriteProvider: args.favoriteProvider,
             };
             return grandparent;
@@ -92,15 +93,15 @@ export const createGrandParents = (registry: TestRegistry): Grandparents => {
                 },
                 ctx,
                 (grandparent: GrandparentData) => {
-                    ctx.log(`GET examples/grandparents/${grandparent.id}`);
+                    monitor.log(`GET examples/grandparents/${grandparent.id}`);
                     chai.assert.equal(grandparent.favoriteProvider, "aws");
                 },
             );
         },
     });
 
-    grandparents.registerDeleteFunc(async (ctx, data) => {
-        ctx.log(`DELETE examples/grandparents/${data.id}`);
+    grandparents.registerDeleteFunc(async (_ctx, data) => {
+        monitor.log(`DELETE examples/grandparents/${data.id}`);
     });
 
     return grandparents;
@@ -125,8 +126,8 @@ type NewParentArgs = { favoriteProvider: string };
 
 type Parents = ResourceManager<ParentData, NewParentArgs>;
 
-export const createParents = (registry: TestRegistry): Parents => {
-    const grandparents = createGrandParents(registry);
+export const createParents = (monitor: SelfTestMonitor, registry: TestRegistry): Parents => {
+    const grandparents = createGrandParents(monitor, registry);
 
     // here's the resource manager. We use a diferent method of creating it here
     // to test / demonstrate it
@@ -153,16 +154,16 @@ export const createParents = (registry: TestRegistry): Parents => {
                     },
                     ctx,
                     (state) => {
-                        ctx.log(
+                        monitor.log(
                             `POST /examples/parents (using grandparent id=${state.data.id}, ${createArgs.favoriteProvider}, ${state.data.favoriteProvider})`,
                         );
                         const result = {
                             favoriteProvider: createArgs.favoriteProvider,
                             grandparentId: state.data.id,
-                            id: ctx.createArbitraryName(),
-                            name: ctx.createArbitraryName(),
+                            id: monitor.createArbitraryName(),
+                            name: monitor.createArbitraryName(),
                         };
-                        ctx.log(`   result id = ${result.id}`);
+                        monitor.log(`   result id = ${result.id}`);
                         state.dependents.push(`parents-${result.id}`);
                         return result;
                     },
@@ -181,8 +182,8 @@ export const createParents = (registry: TestRegistry): Parents => {
             // data in the resource manager that has no dependents to avoid
             // deleting data tha could still be in use (oftentimes in complex
             // systems it's not even possible to delete resources with children)
-            func: async (ctx, data) => {
-                ctx.log(
+            func: async (_ctx, data) => {
+                monitor.log(
                     `DELETE /examples/parents ${data.id}, ${data.favoriteProvider}`,
                 );
                 // politely inform the grandparent resource we're no longer
@@ -207,7 +208,7 @@ export const createParents = (registry: TestRegistry): Parents => {
                 { createArgs: { favoriteProvider: "aws" } },
                 ctx,
                 (data) => {
-                    ctx.log(`GET /examples/parents ${data.id}`);
+                    monitor.log(`GET /examples/parents ${data.id}`);
                 },
             );
         },
@@ -229,8 +230,8 @@ type NewChildArgs = { favoriteProvider: string };
 
 type Children = ResourceManager<ChildData, NewChildArgs>;
 
-export const createChildren = (registry: TestRegistry): Children => {
-    const parents = createParents(registry);
+export const createChildren = (monitor: SelfTestMonitor, registry: TestRegistry): Children => {
+    const parents = createParents(monitor, registry);
 
     const children = registry.newResourceManager<ChildData, NewChildArgs>({
         resourceName: "children",
@@ -252,16 +253,16 @@ export const createChildren = (registry: TestRegistry): Children => {
                     },
                     ctx,
                     (state) => {
-                        ctx.log(
+                        monitor.log(
                             `POST /examples/children (using parent id=${state.data.id})`,
                         );
                         const result = {
                             favoriteProvider: createArgs.favoriteProvider,
                             parentId: state.data.id,
-                            id: ctx.createArbitraryName(),
-                            name: ctx.createArbitraryName(),
+                            id: monitor.createArbitraryName(),
+                            name: monitor.createArbitraryName(),
                         };
-                        ctx.log(`   result id = ${result.id}`);
+                        monitor.log(`   result id = ${result.id}`);
                         state.dependents.push(`children-${result.id}`);
                         return result;
                     },
@@ -275,8 +276,8 @@ export const createChildren = (registry: TestRegistry): Children => {
                 { favoriteProvider: "aws" },
                 { favoriteProvider: "azure" },
             ],
-            func: async (ctx, data) => {
-                ctx.log(`DELETE /examples/children ${data.id}`);
+            func: async (_ctx, data) => {
+                monitor.log(`DELETE /examples/children ${data.id}`);
                 parents.removeDependent(
                     (d) => d.id == data.parentId,
                     `children-${data.id}`,
@@ -295,7 +296,7 @@ export const createChildren = (registry: TestRegistry): Children => {
                 { createArgs: { favoriteProvider: "aws" } },
                 ctx,
                 (data) => {
-                    ctx.log(`GET /examples/child ${data.id}`);
+                    monitor.log(`GET /examples/child ${data.id}`);
                 },
             );
         },
