@@ -1,6 +1,6 @@
 import * as chai from "chai";
-import type * as runner from "../../naf/runner";
-import * as dsl from "../../naf/sugar/dsl";
+import type * as runner from "../../piilop/runner";
+import * as dsl from "../../piilop/sugar/dsl";
 import { SelfTestMonitor } from "tests/runner/utils";
 
 type GrandparentData = {

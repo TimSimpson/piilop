@@ -1,4 +1,4 @@
-import * as dsl from "../../naf/sugar/dsl";
+import * as dsl from "../../piilop/sugar/dsl";
 import * as runnerUtils from "../runner/utils";
 
 describe("the suite keyword makes it easy to create simple tests and ordering", () => {

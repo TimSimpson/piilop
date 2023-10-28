@@ -5,7 +5,7 @@ import {
     ResourceManager,
     TestContext,
     TestRegistry,
-} from "../../../naf/runner";
+} from "../../../piilop/runner";
 import { FakeSaasServiceState } from "./client";
 
 type ContainerData = {

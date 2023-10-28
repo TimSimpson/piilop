@@ -1,7 +1,7 @@
 // import { add } from '../naf/index';
 import * as chai from "chai";
-import type { ITestContext, TestContextPushArgs } from "../../naf/core/base";
-import { isWrapped, wrap } from "../../naf/core/base";
+import type { ITestContext, TestContextPushArgs } from "../../piilop/core/base";
+import { isWrapped, wrap } from "../../piilop/core/base";
 
 class TestContextImpl {
     _currentTestName: string;

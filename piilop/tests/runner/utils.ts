@@ -1,4 +1,4 @@
-import { BreadCrumbs, TestMain, TestRegistry, TestObserver, TestStackInfo, TestStatus } from "../../naf/runner";
+import { BreadCrumbs, TestMain, TestRegistry, TestObserver, TestStackInfo, TestStatus } from "../../piilop/runner";
 
 export const createSelfTestRegistry = (): TestRegistry => {
     // For the tests, we create a custom registry. Typically a global

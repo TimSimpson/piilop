@@ -1,6 +1,6 @@
 import { abort } from "process";
 import * as chai from "chai";
-import { resource, randomName, test, TestContext } from "../../../naf";
+import { resource, randomName, test, TestContext } from "../../../piilop";
 
 export type NetworkData = {
     id: string;

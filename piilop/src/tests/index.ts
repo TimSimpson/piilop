@@ -2,7 +2,7 @@ import * as fs from "fs/promises";
 import * as fsSync from "fs";
 import * as os from "os";
 import * as path from "path";
-import { registry, TestMain } from "../../naf";
+import { registry, TestMain } from "../../piilop";
 
 // Every test we're running has to get imported here or it won't be added to
 // the global registry.

@@ -3,7 +3,7 @@ import {
     ResourceManager,
     TestContext,
     TestRegistry,
-} from "../../naf/runner";
+} from "../../piilop/runner";
 import * as chai from "chai";
 import { SelfTestMonitor } from "./utils";
 

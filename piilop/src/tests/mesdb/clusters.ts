@@ -1,4 +1,4 @@
-import { dependsOn, resource, randomName, test } from "../../../naf";
+import { dependsOn, resource, randomName, test } from "../../../piilop";
 import { providers, networks } from "../infra/networks";
 
 export { providers } from "../infra/networks";
