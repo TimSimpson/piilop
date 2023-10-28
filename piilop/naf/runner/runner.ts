@@ -29,19 +29,24 @@ export type TestStackInfo = {
     breadCrumbs: () => BreadCrumbs,
     currentDepth: () => number,
     currentTestName: () => string | null,
+    id(): string,
 };
+
+let stackId = 0;
 
 class TestStack {
     depth: number;
+    _id: string;
     items: TestStackItem[];
     name: string;
     parent: TestStack | null;
 
-    constructor() {
+    constructor(id?: string) {
         this.parent = null;
         this.items = [];
         this.name = `t-${threadCount}`;
         this.depth = 0;
+        this._id = id || `STACK_${stackId ++}`;
         threadCount += 1;
     }
 
@@ -65,6 +70,10 @@ class TestStack {
 
     public currentTestName(): string | null {
         return this.items[this.items.length - 1].testName;
+    }
+
+    public id(): string {
+        return this._id;
     }
 
     public startChild(): TestStack {
@@ -276,15 +285,15 @@ export class DefaultTestObserver {
         return "  • ".repeat(this.depth);
     }
 
-    public onTestStarted(name: string, _stackInfo: TestStackInfo) {
+    public onTestStarted(name: string, stackInfo: TestStackInfo) {
         this.depth ++;
         const prefix = this.createPrefix();
-        this.log(`${prefix}START ${name}`);
+        this.log(`${stackInfo.id()}${prefix}START ${name}`);
     }
 
     public onTestFinished(name: string, status: TestStatus, stackInfo: TestStackInfo, err?: unknown) {
         const prefix = this.createPrefix();
-        this.log(`${prefix}FINISH ${name} :: ${status}`);
+        this.log(`${stackInfo.id()}${prefix}FINISH ${name} :: ${status}`);
         if (status === 'failed') {
             this.log(
                 `TEST FAILED!\n\ttest: ${this.breadCrumbsToString(stackInfo.breadCrumbs())}\n\terror:${err}`,
@@ -314,9 +323,9 @@ export class TestMain {
         this.observerFactory = observerFactory || (() => new DefaultTestObserver());
     }
 
-    newContext(): TestContext {
+    newContext(stackId?: string): TestContext {
         const opts = new TestContextOpts();
-        const thread = new TestStack();
+        const thread = new TestStack(stackId);
         const observer = this.observerFactory();
         return new TestContext(thread, opts, observer);
     }
@@ -345,7 +354,7 @@ export class TestMain {
             createTestRunnerItem,
         );
 
-        const parallel = false;
+        const parallel = true;
 
         if (parallel) {
             let workLeft: core.TestRunnerItem<TestContext>[] = [];
@@ -360,8 +369,9 @@ export class TestMain {
 
             const workers: Promise<void>[] = [];
             workerCount = workerCount || 1;
+            const workerCountStrLen = workerCount.toString().length;
             for (let i = 0; i < workerCount; i++) {
-                const workerCtx = this.newContext();
+                const workerCtx = this.newContext(`WORKER_${i.toString().padStart(workerCountStrLen, "0")}`);
                 const workerLogic = async () => {
                     await (async () => {})();
                     while (workLeft.length > 0) {
@@ -375,7 +385,7 @@ export class TestMain {
 
             await Promise.all(workers);
         } else {
-            const workerCtx = this.newContext();
+            const workerCtx = this.newContext("");
             for (const entry of list) {
                 if (entry.entry.name.startsWith(name)) {
                     await entry.entry.func(workerCtx);
