@@ -1,6 +1,6 @@
 {
     "name": "piilop",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "Proboscis II: Legend of Proboscis",
     "scripts": {
         "build": "tsc",
