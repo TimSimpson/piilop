@@ -1,6 +1,6 @@
 {
     "name": "piilop",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Proboscis II: Legend of Proboscis",
     "scripts": {
         "build": "tsc",
@@ -17,6 +17,9 @@
     "prettier": {
         "tabWidth": 4
     },
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "prepublish": "tsc",
     "dependencies": {
         "@commander-js/extra-typings": "^11.1.0",
         "@types/chai": "4.3.9",
