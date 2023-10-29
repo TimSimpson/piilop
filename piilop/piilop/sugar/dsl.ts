@@ -69,6 +69,10 @@ export interface ResourceBuilder<
 
 // Creates a set of DSL functions tied tot he given test registry
 export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
+    if ((registry as any)._dslFuncs !== undefined) {
+        return (registry as any)._dslFuncs
+    }
+
     const globalTest: fnTest = (
         name: string,
         func: (ctx: runner.TestContext) => Promise<void>,
@@ -349,7 +353,7 @@ export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
         }
     }
 
-    return {
+    const funcs = {
         addCreateTests: <
             Data extends runner.Data & CreateOptions,
             CreateOptions,
@@ -389,6 +393,11 @@ export const createDslFuncs = (registry: runner.TestRegistry): DslFuncs => {
             currentFuncs.test(name, func);
         },
     };
+
+    // speed up future retrievals
+    (registry as any)._dslFuncs = funcs;
+
+    return funcs;
 };
 
 // let globals: GlobalBag = {
