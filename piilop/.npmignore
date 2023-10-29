@@ -1,1 +1,9 @@
 node_modules
+src/*
+tests/*
+jest.config.js
+README.md
+yarn.lock
+.prettierrc
+.eslintrc.js
+justfile
