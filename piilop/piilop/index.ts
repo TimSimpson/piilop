@@ -28,7 +28,3 @@ export const registry = new TestRegistry();
 
 export const { addCreateTests, addDeleteTests, dependsOn, resource, suite, test } =
     dsl.createDslFuncs(registry);
-
-export const sayHello = () => {
-    console.log("well hi!\n");
-};
